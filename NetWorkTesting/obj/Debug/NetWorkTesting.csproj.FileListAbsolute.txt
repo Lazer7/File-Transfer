@@ -1,0 +1,7 @@
+C:\Users\Jimmy\documents\visual studio 2017\Projects\FileTransferClient\NetWorkTesting\bin\Debug\NetWorkTesting.exe.config
+C:\Users\Jimmy\documents\visual studio 2017\Projects\FileTransferClient\NetWorkTesting\bin\Debug\NetWorkTesting.exe
+C:\Users\Jimmy\documents\visual studio 2017\Projects\FileTransferClient\NetWorkTesting\bin\Debug\NetWorkTesting.pdb
+C:\Users\Jimmy\documents\visual studio 2017\Projects\FileTransferClient\NetWorkTesting\obj\Debug\NetWorkTesting.csproj.CoreCompileInputs.cache
+C:\Users\Jimmy\documents\visual studio 2017\Projects\FileTransferClient\NetWorkTesting\obj\Debug\NetWorkTesting.exe
+C:\Users\Jimmy\documents\visual studio 2017\Projects\FileTransferClient\NetWorkTesting\obj\Debug\NetWorkTesting.pdb
+C:\Users\Jimmy\documents\visual studio 2017\Projects\FileTransferClient\NetWorkTesting\obj\Debug\NetWorkTesting.csprojResolveAssemblyReference.cache

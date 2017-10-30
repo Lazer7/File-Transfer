@@ -1,0 +1,15 @@
+c:\users\jimmy\documents\visual studio 2017\Projects\FileTransferClient\FileTransferClient\bin\Debug\FileTransferClient.exe.config
+c:\users\jimmy\documents\visual studio 2017\Projects\FileTransferClient\FileTransferClient\bin\Debug\FileTransferClient.exe
+c:\users\jimmy\documents\visual studio 2017\Projects\FileTransferClient\FileTransferClient\bin\Debug\FileTransferClient.pdb
+c:\users\jimmy\documents\visual studio 2017\Projects\FileTransferClient\FileTransferClient\obj\Debug\FileTransferClient.csprojResolveAssemblyReference.cache
+c:\users\jimmy\documents\visual studio 2017\Projects\FileTransferClient\FileTransferClient\obj\Debug\App.g.cs
+c:\users\jimmy\documents\visual studio 2017\Projects\FileTransferClient\FileTransferClient\obj\Debug\FileTransferClient_MarkupCompile.cache
+c:\users\jimmy\documents\visual studio 2017\Projects\FileTransferClient\FileTransferClient\obj\Debug\FileTransferClient_MarkupCompile.lref
+c:\users\jimmy\documents\visual studio 2017\Projects\FileTransferClient\FileTransferClient\obj\Debug\FileTransferClient.g.resources
+c:\users\jimmy\documents\visual studio 2017\Projects\FileTransferClient\FileTransferClient\obj\Debug\FileTransferClient.Properties.Resources.resources
+c:\users\jimmy\documents\visual studio 2017\Projects\FileTransferClient\FileTransferClient\obj\Debug\FileTransferClient.csproj.GenerateResource.Cache
+c:\users\jimmy\documents\visual studio 2017\Projects\FileTransferClient\FileTransferClient\obj\Debug\FileTransferClient.csproj.CoreCompileInputs.cache
+c:\users\jimmy\documents\visual studio 2017\Projects\FileTransferClient\FileTransferClient\obj\Debug\FileTransferClient.exe
+c:\users\jimmy\documents\visual studio 2017\Projects\FileTransferClient\FileTransferClient\obj\Debug\FileTransferClient.pdb
+c:\users\jimmy\documents\visual studio 2017\Projects\FileTransferClient\FileTransferClient\obj\Debug\Views\MainWindow.g.cs
+c:\users\jimmy\documents\visual studio 2017\Projects\FileTransferClient\FileTransferClient\obj\Debug\Views\MainWindow.baml
