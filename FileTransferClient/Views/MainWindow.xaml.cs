@@ -54,7 +54,10 @@ namespace FileTransferClient
             {
                 LabelChecking.Content = errorCheck;
             }
-            peerConnection.ConnectToPeer("192.168.1.7");
+            foreach (String ip in connectedIPAddress)
+            {
+                peerConnection.ConnectToPeer(ip);
+            }
             LabelChecking.Content = "ReConnected";
         }
 
@@ -79,6 +82,7 @@ namespace FileTransferClient
                 open.Description = "Locate your Folder to Sync";
                 open.ShowDialog();
                 peerConnection = new Connection(open.SelectedPath);
+                MessageBox.Show(open.SelectedPath);
                 open.Dispose();
             }
             ///////////////////////////////////////////////////////////////
@@ -93,6 +97,11 @@ namespace FileTransferClient
             ConnectingB.IsEnabled = true;
             RefreshButton.IsEnabled = true;
             SendButton.IsEnabled = true;
+        }
+
+        private void getFolderContents()
+        {
+
         }
     }
 }

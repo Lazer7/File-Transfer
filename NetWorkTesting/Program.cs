@@ -57,26 +57,33 @@ namespace NetWorkTesting
             /////////////////////////////////////////////////////////////////
 
             ///////////////////////PINGING ALL ADDRESSES//////////////////////////////////////////
-            string hostName = Dns.GetHostName();
-            IPAddress[] iPAddress = Dns.GetHostAddresses(hostName);
-            String ipAddressHost = iPAddress[1].ToString();
-            ipAddressHost = ipAddressHost.Substring(0, ipAddressHost.LastIndexOf('.') + 1);
-            Console.WriteLine(ipAddressHost.Substring(0, ipAddressHost.LastIndexOf('.')+1));
-            for (int i = 1; i < 255; i++)
-            {
-                ProcessStartInfo processInfo = new ProcessStartInfo();
-                processInfo.FileName = Environment.SystemDirectory + "\\PING.EXE";
-                processInfo.Arguments = ipAddressHost+i+" -n 1";
-                Console.WriteLine(ipAddressHost + i + " -n 1");
-                processInfo.UseShellExecute = false;
-                processInfo.CreateNoWindow = true;
-                Process process = new Process();
-                process.StartInfo = processInfo;
-                process.Start();   
-            }
+            //string hostName = Dns.GetHostName();
+            //IPAddress[] iPAddress = Dns.GetHostAddresses(hostName);
+            //String ipAddressHost = iPAddress[1].ToString();
+            //ipAddressHost = ipAddressHost.Substring(0, ipAddressHost.LastIndexOf('.') + 1);
+            //Console.WriteLine(ipAddressHost.Substring(0, ipAddressHost.LastIndexOf('.')+1));
+            //for (int i = 1; i < 255; i++)
+            //{
+            //    ProcessStartInfo processInfo = new ProcessStartInfo();
+            //    processInfo.FileName = Environment.SystemDirectory + "\\PING.EXE";
+            //    processInfo.Arguments = ipAddressHost+i+" -n 1";
+            //    Console.WriteLine(ipAddressHost + i + " -n 1");
+            //    processInfo.UseShellExecute = false;
+            //    processInfo.CreateNoWindow = true;
+            //    Process process = new Process();
+            //    process.StartInfo = processInfo;
+            //    process.Start();   
+            //}
             //////////////////////////////////////////////////////////////////////////////////////
 
 
+            //////////////////////Getting all file names from a directory///////////////////////
+            string[] fileArray = Directory.GetFiles("C:\\Users\\Jimmy\\Desktop\\CECS_327_Distributed_Network");
+            foreach (string x in fileArray)
+            {
+                Console.WriteLine(x);
+            }
+            ////////////////////////////////////////////////////////////////////////////////
 
         }
     }

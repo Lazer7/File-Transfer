@@ -22,6 +22,7 @@ namespace FileTransferClient.Models
         {
             this.folderName = folderName;
         }
+        public String GetSyncFolderName() { return folderName; }
         public string CreatePeerConnection()
         {
             try
@@ -86,8 +87,8 @@ namespace FileTransferClient.Models
         }
         public string SendFile(String file)
         {
-            String fileDirectory = folderName+"\\"+ file;
-            byte[] fileContents = File.ReadAllBytes(fileDirectory);
+            //String fileDirectory = folderName+"\\"+ file;
+            byte[] fileContents = File.ReadAllBytes(file);
             try
             {
                 senderSocket.Send(fileContents);
