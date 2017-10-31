@@ -92,6 +92,7 @@ namespace FileTransferClient.Models
         public string SendFile(String file)
         {
             String fileDirectory = folderName+"\\"+ file;
+            Debug.Assert(false, file);
             byte[] metaData = new byte[FILEBYTELIMIT+FILEDATEBYTLELIMIT+FILENAMEBYTELIMIT];
             int counter = 0;
             foreach (byte x in File.ReadAllBytes(fileDirectory))
@@ -122,7 +123,7 @@ namespace FileTransferClient.Models
 
         public void CallBack(IAsyncResult ar)
         {
-            Debug.Assert(false, "Receiving");
+            //Debug.Assert(false, "Receiving");
             try
             {
                 byte[] buffer = new byte[FILEBYTELIMIT+FILENAMEBYTELIMIT+FILEDATEBYTLELIMIT];
@@ -148,16 +149,29 @@ namespace FileTransferClient.Models
                 object[] obj = (object[])ar.AsyncState;
                 fileContents = (byte[])obj[0];
                 Handler = (Socket)obj[1];
-                int NumberOfBytes = Handler.EndReceive(ar);
-                if (NumberOfBytes > 0)
+                int NumberOfBytes = fileContents.Length;
+                if (NumberOfBytes >= FILEBYTELIMIT+FILEDATEBYTLELIMIT+FILENAMEBYTELIMIT)
                 {
-                    byte[] fileNameBytes = new byte[FILENAMEBYTELIMIT];
+                    Debug.Assert(false, "GETTING NAME");
+                    int spaces = 0;
+                    int stringSize = 0;
                     for (int i = FILEBYTELIMIT; i < FILEBYTELIMIT+FILENAMEBYTELIMIT; i++)
                     {
-                        fileNameBytes[i-FILEBYTELIMIT] = fileContents[i];
+                        if (fileContents[i] == 0)
+                        {
+                            spaces++;
+                        }
+                        if (spaces == 1) { break; }
+                        stringSize++;
                     }
-                    String fileName= (Encoding.ASCII.GetString(fileNameBytes)).Trim();
-                    Debug.Assert(false, fileName);
+                    byte[] fileNameBytes = new byte[stringSize];
+                    for (int i = FILEBYTELIMIT; i < FILEBYTELIMIT+stringSize; i++)
+                    {
+                        fileNameBytes[i-FILEBYTELIMIT] = fileContents[i];
+                        Debug.Assert(false, fileNameBytes[i - FILEBYTELIMIT].ToString());
+                    }
+                    String fileName = (Encoding.ASCII.GetString(fileNameBytes)).Trim();
+                    Debug.Assert(false, "File name is:"+fileName);
                     BinaryWriter Writer = new BinaryWriter(File.OpenWrite(folderName + "\\"+fileName));
                     byte[] fileContentsdecrypt = new byte[FILEBYTELIMIT];
                     for (int i=0; i<FILEBYTELIMIT; i++)
