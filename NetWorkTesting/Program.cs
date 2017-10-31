@@ -111,12 +111,11 @@ namespace NetWorkTesting
             foreach (byte x in Encoding.ASCII.GetBytes(File.GetLastWriteTime("C:\\Users\\Jimmy\\Desktop\\Client1\\ahri.jpg").ToString()))
             {
                 metaData[counter] = x;
-                Console.WriteLine(metaData[counter]);
             }
             // byte date = Convert.ToByte(File.GetLastWriteTime("C:\\Users\\Jimmy\\Desktop\\Client1\\ahri.jpg"));
             //Console.WriteLine(File.GetLastWriteTime("C:\\Users\\Jimmy\\Desktop\\Client1\\ahri.jpg"));
             DateTime x2 = DateTime.Parse("5/23/2017 1:28:02 PM");
-            Console.WriteLine(x2.ToString());
+
 
 
             int spaces = 0;
@@ -126,7 +125,6 @@ namespace NetWorkTesting
                 if (metaData[i] == 0)
                 {
                     spaces++;
-                    Console.WriteLine("Here");
                 }
                 if (spaces == 1) { break; }
                 stringSize++;

@@ -154,7 +154,7 @@ namespace FileTransferClient.Models
                     byte[] fileNameBytes = new byte[FILENAMEBYTELIMIT];
                     for (int i = FILEBYTELIMIT; i < FILEBYTELIMIT+FILENAMEBYTELIMIT; i++)
                     {
-                        fileNameBytes[i] = fileContents[i];
+                        fileNameBytes[i-FILEBYTELIMIT] = fileContents[i];
                     }
                     String fileName= (Encoding.ASCII.GetString(fileNameBytes)).Trim();
                     Debug.Assert(false, fileName);
