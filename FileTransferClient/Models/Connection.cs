@@ -94,6 +94,7 @@ namespace FileTransferClient.Models
         }
         public string SendFile(String file)
         {
+            Debug.Assert(false,"send file Was Called");
             String fileDirectory = folderName+"\\"+ file;
             byte[] metaData = File.ReadAllBytes(fileDirectory);
             try
@@ -106,6 +107,7 @@ namespace FileTransferClient.Models
         }
         public string SendFileMetaData(String file)
         {
+            Debug.Assert(false, "send meta file Was Called");
             byte[] metaData = new byte[FILEDATEBYTELIMIT + FILENAMEBYTELIMIT];
             String fileDirectory = folderName + "\\" + file;
             int counter = 0;
@@ -160,7 +162,7 @@ namespace FileTransferClient.Models
                 fileContents = (byte[])obj[0];
                 Handler = (Socket)obj[1];
                 int NumberOfBytes = fileContents.Length;
-                if (NumberOfBytes > 0 && metaData)
+                if (NumberOfBytes >= 0 && metaData)
                 {
                     int spaces = 0;
                     int stringSize = 0;
@@ -170,7 +172,7 @@ namespace FileTransferClient.Models
                         {
                             spaces++;
                         }
-                        if (spaces == 5) { break; }
+                        if (spaces == 1) { break; }
                         stringSize++;
                     }
                     byte[] fileNameBytes = new byte[stringSize];
@@ -179,10 +181,11 @@ namespace FileTransferClient.Models
                         fileNameBytes[i] = fileContents[i];
                     }
                     receivingFileName = (Encoding.ASCII.GetString(fileNameBytes)).Trim();
-                    metaData = false;
-                    
+                    Debug.Assert(false, "FILE NAME:---"+receivingFileName+"-----");
+                    metaData = false; 
+
                 }
-                else if (NumberOfBytes > 0 && !metaData)
+                else if (NumberOfBytes >= 0 && !metaData)
                 {
                     BinaryWriter Writer = new BinaryWriter(File.OpenWrite(folderName + "\\" + receivingFileName));
                     byte[] fileContentsdecrypt = new byte[FILEBYTELIMIT];
@@ -193,14 +196,15 @@ namespace FileTransferClient.Models
                     Writer.Write(fileContents);
                     Writer.Flush();
                     Writer.Close();
-                    metaData = false;
+                    metaData = true;
                 }
+
             }
             catch(Exception ex)
             {
                 Debug.Assert(false, ex.Message);
             }
-            
+           
         }
         public void PingAddress()
         {
