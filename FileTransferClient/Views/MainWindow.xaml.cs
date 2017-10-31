@@ -27,7 +27,7 @@ namespace FileTransferClient
     {
         Connection peerConnection;
         List<String> connectedIPAddress;
-        
+        String[] fileList;
         public MainWindow()
         {
             InitializeComponent();
@@ -49,7 +49,8 @@ namespace FileTransferClient
 
         private void SendButton_Click(object sender, RoutedEventArgs e)
         {
-            string errorCheck = peerConnection.SendFile("ahri.jpg");
+
+            string errorCheck = peerConnection.SendFile(fileList[0]);
             if (errorCheck!= null)
             {
                 LabelChecking.Content = errorCheck;
@@ -58,7 +59,6 @@ namespace FileTransferClient
             {
                 peerConnection.ConnectToPeer(ip);
             }
-            LabelChecking.Content = "ReConnected";
         }
 
         private void DisconnectButton_Click(object sender, RoutedEventArgs e)
@@ -93,15 +93,25 @@ namespace FileTransferClient
             IPAddress[] iPAddress = Dns.GetHostAddresses(hostName);
             LabelChecking.Content = "Your IP Address is" + iPAddress[1].ToString();
             AvailableIPAddressListBox.ItemsSource = peerConnection.GetIpAddress();
+          
             DisconnectButton.IsEnabled = true;
             ConnectingB.IsEnabled = true;
             RefreshButton.IsEnabled = true;
             SendButton.IsEnabled = true;
         }
-
-        private void getFolderContents()
+        private void GetFileNames()
         {
+            String[] tempList =Directory.GetFiles(peerConnection.GetSyncFolderName());
+            fileList = new String[tempList.Length];
+            int currentfile = 0;
+            foreach (String file in tempList)
+            {
+                String fileName = file.Substring(file.LastIndexOf('\\') + 1);
+                Console.WriteLine(fileName);
+                fileList[currentfile] = file;
+            }
 
         }
+
     }
 }

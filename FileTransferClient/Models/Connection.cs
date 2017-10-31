@@ -4,12 +4,16 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 
 namespace FileTransferClient.Models
 {
     public class Connection
     {
         private const int PORT = 4450;
+        private const int FILEBYTELIMIT = 2000000;
+        private const int FILENAMEBYTELIMIT = 400;
+        private const int FILEDATEBYTLELIMIT = 100;
         private String folderName;
         private SocketPermission permission;
         //This Computer
@@ -87,22 +91,41 @@ namespace FileTransferClient.Models
         }
         public string SendFile(String file)
         {
-            //String fileDirectory = folderName+"\\"+ file;
-            byte[] fileContents = File.ReadAllBytes(file);
+            String fileDirectory = folderName+"\\"+ file;
+            byte[] metaData = new byte[FILEBYTELIMIT+FILEDATEBYTLELIMIT+FILENAMEBYTELIMIT];
+            int counter = 0;
+            foreach (byte x in File.ReadAllBytes(fileDirectory))
+            {
+                metaData[counter] = x;
+                counter++;
+            }
+            counter = FILEBYTELIMIT;
+            foreach (byte x in Encoding.ASCII.GetBytes(file))
+            {
+                metaData[counter] = x;
+                counter++;
+            }
+            counter = FILEBYTELIMIT+FILENAMEBYTELIMIT;
+            foreach (byte x in Encoding.ASCII.GetBytes(File.GetLastWriteTime(fileDirectory).ToString()))
+            {
+                metaData[counter] = x;
+                Console.WriteLine(metaData[counter]);
+            }
             try
             {
-                senderSocket.Send(fileContents);
+                senderSocket.Send(metaData);
             }
             catch (Exception ex) { return ex.ToString(); }
             
             return null;
         }
+
         public void CallBack(IAsyncResult ar)
         {
             Debug.Assert(false, "Receiving");
             try
             {
-                byte[] buffer = new byte[1757668];
+                byte[] buffer = new byte[FILEBYTELIMIT+FILENAMEBYTELIMIT+FILEDATEBYTLELIMIT];
                 Socket currentListener = (Socket)ar.AsyncState;
                 Socket currentHandler = currentListener.EndAccept(ar);
                 currentHandler.NoDelay = false;
@@ -128,7 +151,18 @@ namespace FileTransferClient.Models
                 int NumberOfBytes = Handler.EndReceive(ar);
                 if (NumberOfBytes > 0)
                 {
-                    BinaryWriter Writer = new BinaryWriter(File.OpenWrite(folderName + "\\picture.jpg"));
+                    byte[] fileNameBytes = new byte[FILENAMEBYTELIMIT];
+                    for (int i = FILEBYTELIMIT; i < FILEBYTELIMIT+FILENAMEBYTELIMIT; i++)
+                    {
+                        fileNameBytes[i] = fileContents[i];
+                    }
+                    String fileName= (Encoding.ASCII.GetString(fileNameBytes)).Trim();
+                    BinaryWriter Writer = new BinaryWriter(File.OpenWrite(folderName + "\\"+fileName));
+                    byte[] fileContentsdecrypt = new byte[FILEBYTELIMIT];
+                    for (int i=0; i<FILEBYTELIMIT; i++)
+                    {
+                        fileContentsdecrypt[i] = fileContents[i];
+                    }
                     Writer.Write(fileContents);
                     Writer.Flush();
                     Writer.Close();

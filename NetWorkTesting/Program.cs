@@ -12,6 +12,8 @@ namespace NetWorkTesting
 {
     class Program
     {
+        private const int FILEBYTELIMIT = 2000000;
+        private const int FILENAMEBYTELIMIT = 500;
         static void Main(string[] args)
         {
 
@@ -77,12 +79,65 @@ namespace NetWorkTesting
             //////////////////////////////////////////////////////////////////////////////////////
 
 
-            //////////////////////Getting all file names from a directory///////////////////////
-            string[] fileArray = Directory.GetFiles("C:\\Users\\Jimmy\\Desktop\\CECS_327_Distributed_Network");
-            foreach (string x in fileArray)
+            ////////////////////Getting all file names from a directory///////////////////////
+            //String[] tempList = Directory.GetFiles("C:\\Users\\Jimmy\\Desktop\\CECS_327_Distributed_Network");
+            //String[] fileList = new String[tempList.Length];
+            //int currentfile = 0;
+            //foreach (String file in tempList)
+            //{
+            //    String fileName = file.Substring(file.LastIndexOf('\\')+1);
+            //    Console.WriteLine(fileName);
+            //    fileList[currentfile] = file;
+            //}
+
+            //////////////////////////////////////////////////////////////////////////////
+
+
+            ////////////////////////Byte Reading /////////////////////////////////////////////
+            byte[] metaData = new byte[2000500];
+            int counter = 0;
+            foreach (byte x in File.ReadAllBytes("C:\\Users\\Jimmy\\Desktop\\Client1\\ahri.jpg"))
             {
-                Console.WriteLine(x);
+                metaData[counter] = x;
+                counter++;
             }
+            counter = 2000000;
+            foreach (byte x in Encoding.ASCII.GetBytes("ahri.jpg"))
+            {
+                metaData[counter] = x;
+                counter++;
+            }
+            counter = 2000400;
+            foreach (byte x in Encoding.ASCII.GetBytes(File.GetLastWriteTime("C:\\Users\\Jimmy\\Desktop\\Client1\\ahri.jpg").ToString()))
+            {
+                metaData[counter] = x;
+                Console.WriteLine(metaData[counter]);
+            }
+            // byte date = Convert.ToByte(File.GetLastWriteTime("C:\\Users\\Jimmy\\Desktop\\Client1\\ahri.jpg"));
+            //Console.WriteLine(File.GetLastWriteTime("C:\\Users\\Jimmy\\Desktop\\Client1\\ahri.jpg"));
+            DateTime x2 = DateTime.Parse("5/23/2017 1:28:02 PM");
+            Console.WriteLine(x2.ToString());
+
+
+            int spaces = 0;
+            int stringSize = 0;
+            for (int i = 2000000; i < 2000500; i++)
+            {
+                if (metaData[i] == 0)
+                {
+                    spaces++;
+                    Console.WriteLine("Here");
+                }
+                if (spaces == 2) { break; }
+                stringSize++;
+            }
+            byte[] decodeName = new byte[stringSize];
+            for (int i = 2000000; i < 2000000 + stringSize; i++)
+            {
+                decodeName[i - 2000000] = metaData[i];
+            }
+            String filename = (Encoding.ASCII.GetString(decodeName)).Trim();
+            Console.Write(filename);
             ////////////////////////////////////////////////////////////////////////////////
 
         }
