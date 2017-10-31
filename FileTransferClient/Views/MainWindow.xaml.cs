@@ -50,7 +50,8 @@ namespace FileTransferClient
         private void SendButton_Click(object sender, RoutedEventArgs e)
         {
 
-            string errorCheck = peerConnection.SendFile(fileList[0]);
+            String errorCheck = peerConnection.SendFileMetaData(fileList[0]);
+            errorCheck = peerConnection.SendFile(fileList[0]);
             if (errorCheck!= null)
             {
                 LabelChecking.Content = errorCheck;
