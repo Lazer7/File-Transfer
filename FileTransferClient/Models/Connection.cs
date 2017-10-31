@@ -18,12 +18,10 @@ namespace FileTransferClient.Models
         private Socket Handler;
         //Connecting to Other Computer
         private Socket senderSocket;
-
         public Connection(string folderName)
         {
             this.folderName = folderName;
         }
-
         public string CreatePeerConnection()
         {
             try
@@ -59,7 +57,6 @@ namespace FileTransferClient.Models
             catch (Exception ex) { return ex.ToString(); }
             return "Success";
         }
-
         public List<String> GetIpAddress()
         {
             List<String> ipAddressList = new List<String>();
@@ -87,8 +84,6 @@ namespace FileTransferClient.Models
             ipAddressList.Add(iPAddress[1].ToString());
             return ipAddressList;
         }
-
-
         public string SendFile(String file)
         {
             String fileDirectory = folderName+"\\"+ file;
@@ -144,7 +139,24 @@ namespace FileTransferClient.Models
             }
             
         }
-        
+        public void PingAddress()
+        {
+            string hostName = Dns.GetHostName();
+            IPAddress[] iPAddress = Dns.GetHostAddresses(hostName);
+            String ipAddressHost = iPAddress[1].ToString();
+            ipAddressHost = ipAddressHost.Substring(0, ipAddressHost.LastIndexOf('.') + 1);
+            for (int i = 1; i < 255; i++)
+            {
+                ProcessStartInfo processInfo = new ProcessStartInfo();
+                processInfo.FileName = Environment.SystemDirectory + "\\PING.EXE";
+                processInfo.Arguments = ipAddressHost + i + " -n 1";
+                processInfo.UseShellExecute = false;
+                processInfo.CreateNoWindow = true;
+                Process process = new Process();
+                process.StartInfo = processInfo;
+                process.Start();
+            }
+        }
 
 
 

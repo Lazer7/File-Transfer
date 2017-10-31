@@ -5,16 +5,18 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FileTransferClient"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="MainWindow" Height="384.2" Width="525">
     <Grid>
-        <Button Name="ConnectingB" Content="Connect" Click="ConnectingB_Click" HorizontalAlignment="Left" Margin="64,251,0,0" VerticalAlignment="Top" Width="75"/>
-        <Label Name="LabelChecking" Content="Checking" HorizontalAlignment="Left" Margin="210,10,0,0" VerticalAlignment="Top"/>
-        <Button Name="SendButton" Content="Send" Click="SendButton_Click" HorizontalAlignment="Left" Margin="210,283,0,0" VerticalAlignment="Top" Width="75"/>
-        <ListBox Name="AvailableIPAddressListBox" HorizontalAlignment="Left" Height="162" Margin="64,71,0,0" VerticalAlignment="Top" Width="154"/>
-        <ListBox Name="ConnectedIPAddressListBox" HorizontalAlignment="Left" Height="162" Margin="281,71,0,0" VerticalAlignment="Top" Width="157"/>
-        <Label Content="Available IP Addresses" HorizontalAlignment="Left" Margin="64,45,0,0" VerticalAlignment="Top"/>
-        <Label Content="Connected Devices" HorizontalAlignment="Left" Margin="281,45,0,0" VerticalAlignment="Top"/>
-        <Button Name="DisconnectButton" Content="Disconnect" Click="DisconnectButton_Click" HorizontalAlignment="Left" Margin="316,251,0,0" VerticalAlignment="Top" Width="75"/>
+        <Button Name="ConnectingB" Content="Connect" Click="ConnectingB_Click" HorizontalAlignment="Left" Margin="71,293,0,0" VerticalAlignment="Top" Width="75"/>
+        <Label Name="LabelChecking" Content="Checking" HorizontalAlignment="Left" Margin="114,57,0,0" VerticalAlignment="Top"/>
+        <Button Name="SendButton" Content="Send" Click="SendButton_Click" HorizontalAlignment="Left" Margin="217,325,0,0" VerticalAlignment="Top" Width="75"/>
+        <ListBox Name="AvailableIPAddressListBox" HorizontalAlignment="Left" Height="162" Margin="71,113,0,0" VerticalAlignment="Top" Width="154"/>
+        <ListBox Name="ConnectedIPAddressListBox" HorizontalAlignment="Left" Height="162" Margin="288,113,0,0" VerticalAlignment="Top" Width="157"/>
+        <Label Content="Available IP Addresses" HorizontalAlignment="Left" Margin="71,87,0,0" VerticalAlignment="Top"/>
+        <Label Content="Connected Devices" HorizontalAlignment="Left" Margin="288,87,0,0" VerticalAlignment="Top"/>
+        <Button Name="DisconnectButton" Content="Disconnect" Click="DisconnectButton_Click" HorizontalAlignment="Left" Margin="323,293,0,0" VerticalAlignment="Top" Width="75"/>
+        <Button Name="RefreshButton" Content="Refresh" Click="Refresh_Click" HorizontalAlignment="Left" Margin="25,63,0,0" VerticalAlignment="Top" Width="51"/>
+        <Button Content="Search for Folder" Click="Folder_Click" HorizontalAlignment="Left" Margin="25,26,0,0" VerticalAlignment="Top" Width="105"/>
 
     </Grid>
 </Window>

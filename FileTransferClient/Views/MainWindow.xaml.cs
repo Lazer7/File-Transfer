@@ -27,26 +27,16 @@ namespace FileTransferClient
     {
         Connection peerConnection;
         List<String> connectedIPAddress;
+        
         public MainWindow()
         {
             InitializeComponent();
-            ///////////////////////GET FOLDER FOR SYNCING//////////////////
-            using (var open = new System.Windows.Forms.FolderBrowserDialog())
-            {
-                open.Description = "Locate your Folder to Sync";
-                open.ShowDialog();
-                peerConnection = new Connection(open.SelectedPath);
-                MessageBox.Show(open.SelectedPath);
-            }
-            ///////////////////////////////////////////////////////////////
-
-            connectedIPAddress = new List<string>();
-
-            peerConnection.CreatePeerConnection();
-            string hostName = Dns.GetHostName();
-            IPAddress[] iPAddress = Dns.GetHostAddresses(hostName);
-            LabelChecking.Content = "Your IP Address is" + iPAddress[1].ToString();
-            AvailableIPAddressListBox.ItemsSource = peerConnection.GetIpAddress();
+            DisconnectButton.IsEnabled = false;
+            ConnectingB.IsEnabled = false;
+            RefreshButton.IsEnabled = false;
+            SendButton.IsEnabled = false;
+            BringIntoView();
+            Focus();
         }
 
         private void ConnectingB_Click(object sender, RoutedEventArgs e)
@@ -72,6 +62,37 @@ namespace FileTransferClient
         {
             String ipAddress = (String) ConnectedIPAddressListBox.SelectedItem;
             connectedIPAddress.Remove(ipAddress);
+        }
+
+        private void Refresh_Click(object sender, RoutedEventArgs e)
+        {
+            peerConnection.PingAddress();
+            AvailableIPAddressListBox.ItemsSource = peerConnection.GetIpAddress();
+        }
+
+        private void Folder_Click(object sender, RoutedEventArgs e)
+        {
+
+            ///////////////////////GET FOLDER FOR SYNCING//////////////////
+            using (var open = new System.Windows.Forms.FolderBrowserDialog())
+            {
+                open.Description = "Locate your Folder to Sync";
+                open.ShowDialog();
+                peerConnection = new Connection(open.SelectedPath);
+                open.Dispose();
+            }
+            ///////////////////////////////////////////////////////////////
+            peerConnection.PingAddress();
+            connectedIPAddress = new List<string>();
+            peerConnection.CreatePeerConnection();
+            string hostName = Dns.GetHostName();
+            IPAddress[] iPAddress = Dns.GetHostAddresses(hostName);
+            LabelChecking.Content = "Your IP Address is" + iPAddress[1].ToString();
+            AvailableIPAddressListBox.ItemsSource = peerConnection.GetIpAddress();
+            DisconnectButton.IsEnabled = true;
+            ConnectingB.IsEnabled = true;
+            RefreshButton.IsEnabled = true;
+            SendButton.IsEnabled = true;
         }
     }
 }
