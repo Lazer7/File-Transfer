@@ -128,7 +128,7 @@ namespace NetWorkTesting
                     spaces++;
                     Console.WriteLine("Here");
                 }
-                if (spaces == 2) { break; }
+                if (spaces == 1) { break; }
                 stringSize++;
             }
             byte[] decodeName = new byte[stringSize];

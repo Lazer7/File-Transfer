@@ -93,7 +93,7 @@ namespace FileTransferClient
             IPAddress[] iPAddress = Dns.GetHostAddresses(hostName);
             LabelChecking.Content = "Your IP Address is" + iPAddress[1].ToString();
             AvailableIPAddressListBox.ItemsSource = peerConnection.GetIpAddress();
-          
+            GetFileNames();
             DisconnectButton.IsEnabled = true;
             ConnectingB.IsEnabled = true;
             RefreshButton.IsEnabled = true;
@@ -108,7 +108,9 @@ namespace FileTransferClient
             {
                 String fileName = file.Substring(file.LastIndexOf('\\') + 1);
                 Console.WriteLine(fileName);
-                fileList[currentfile] = file;
+                fileList[currentfile] = fileName;
+                MessageBox.Show(fileList[currentfile]);
+                currentfile++;
             }
 
         }
