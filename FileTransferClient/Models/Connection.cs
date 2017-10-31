@@ -87,14 +87,13 @@ namespace FileTransferClient.Models
                     ipAddressList.Add(trueIP);
                 }
             }
-            string hostName = Dns.GetHostName();
+            /*string hostName = Dns.GetHostName();
             IPAddress[] iPAddress = Dns.GetHostAddresses(hostName);
-            ipAddressList.Add(iPAddress[1].ToString());
+            ipAddressList.Add(iPAddress[1].ToString());*/
             return ipAddressList;
         }
         public string SendFile(String file)
         {
-            Debug.Assert(false,"send file Was Called");
             String fileDirectory = folderName+"\\"+ file;
             byte[] metaData = File.ReadAllBytes(fileDirectory);
             try
@@ -107,7 +106,6 @@ namespace FileTransferClient.Models
         }
         public string SendFileMetaData(String file)
         {
-            Debug.Assert(false, "send meta file Was Called");
             byte[] metaData = new byte[FILEDATEBYTELIMIT + FILENAMEBYTELIMIT];
             String fileDirectory = folderName + "\\" + file;
             int counter = 0;
@@ -181,7 +179,6 @@ namespace FileTransferClient.Models
                         fileNameBytes[i] = fileContents[i];
                     }
                     receivingFileName = (Encoding.ASCII.GetString(fileNameBytes)).Trim();
-                    Debug.Assert(false, "FILE NAME:---"+receivingFileName+"-----");
                     metaData = false; 
 
                 }

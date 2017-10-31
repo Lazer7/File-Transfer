@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="384.2" Width="525">
     <Grid>
-        <Button Name="ConnectingB" Content="Connect" Click="ConnectingB_Click" HorizontalAlignment="Left" Margin="71,293,0,0" VerticalAlignment="Top" Width="75"/>
+        <Button Name="ConnectingB" Content="Connect" Click="Connect_Click" HorizontalAlignment="Left" Margin="71,293,0,0" VerticalAlignment="Top" Width="75"/>
         <Label Name="LabelChecking" Content="Checking" HorizontalAlignment="Left" Margin="114,57,0,0" VerticalAlignment="Top"/>
         <Button Name="SendButton" Content="Send" Click="SendButton_Click" HorizontalAlignment="Left" Margin="217,325,0,0" VerticalAlignment="Top" Width="75"/>
         <ListBox Name="AvailableIPAddressListBox" HorizontalAlignment="Left" Height="162" Margin="71,113,0,0" VerticalAlignment="Top" Width="154"/>

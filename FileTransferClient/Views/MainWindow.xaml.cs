@@ -25,21 +25,29 @@ namespace FileTransferClient
     /// </summary>
     public partial class MainWindow : Window
     {
+        //Creates the sockets to connect to peers
         Connection peerConnection;
+        //Contains list of connected IPAddresses
         List<String> connectedIPAddress;
+        //Contains list of all files in the specified directory
         String[] fileList;
+
         public MainWindow()
         {
             InitializeComponent();
+            //Creates an empty list of connected ip
+            connectedIPAddress = new List<string>();
+            //Set all buttons to inenabled until user specifies a sync directory
             DisconnectButton.IsEnabled = false;
             ConnectingB.IsEnabled = false;
             RefreshButton.IsEnabled = false;
             SendButton.IsEnabled = false;
+            //Brings Window into focus
             BringIntoView();
             Focus();
         }
 
-        private void ConnectingB_Click(object sender, RoutedEventArgs e)
+        private void Connect_Click(object sender, RoutedEventArgs e)
         {
             String ipAddress = AvailableIPAddressListBox.SelectedItem.ToString();
             connectedIPAddress.Add(ipAddress);
@@ -49,25 +57,27 @@ namespace FileTransferClient
 
         private void SendButton_Click(object sender, RoutedEventArgs e)
         {
+            for (int i = 0; i < fileList.Length; i++)
+            {
+                String errorCheck = peerConnection.SendFileMetaData(fileList[i]);
 
-            String errorCheck = peerConnection.SendFileMetaData(fileList[0]);
-            
-            if (errorCheck!= null)
-            {
-                LabelChecking.Content = errorCheck;
-            }
-            foreach (String ip in connectedIPAddress)
-            {
-                peerConnection.ConnectToPeer(ip);
-            }
-            errorCheck = peerConnection.SendFile(fileList[0]);
-            if (errorCheck != null)
-            {
-                LabelChecking.Content = errorCheck;
-            }
-            foreach (String ip in connectedIPAddress)
-            {
-                peerConnection.ConnectToPeer(ip);
+                if (errorCheck != null)
+                {
+                    LabelChecking.Content = errorCheck;
+                }
+                foreach (String ip in connectedIPAddress)
+                {
+                    peerConnection.ConnectToPeer(ip);
+                }
+                errorCheck = peerConnection.SendFile(fileList[0]);
+                if (errorCheck != null)
+                {
+                    LabelChecking.Content = errorCheck;
+                }
+                foreach (String ip in connectedIPAddress)
+                {
+                    peerConnection.ConnectToPeer(ip);
+                }
             }
         }
 
@@ -92,16 +102,19 @@ namespace FileTransferClient
                 open.Description = "Locate your Folder to Sync";
                 open.ShowDialog();
                 peerConnection = new Connection(open.SelectedPath);
-                MessageBox.Show(open.SelectedPath);
                 open.Dispose();
             }
             ///////////////////////////////////////////////////////////////
+            //Ping all ip addressses on the network
             peerConnection.PingAddress();
-            connectedIPAddress = new List<string>();
+            //Creates a socket listener for this client
             peerConnection.CreatePeerConnection();
+            ///////Gets and display the host computer's ip address////////
             string hostName = Dns.GetHostName();
             IPAddress[] iPAddress = Dns.GetHostAddresses(hostName);
             LabelChecking.Content = "Your IP Address is" + iPAddress[1].ToString();
+            //////////////////////////////////////////////////////////////
+            //Sets 
             AvailableIPAddressListBox.ItemsSource = peerConnection.GetIpAddress();
             GetFileNames();
             DisconnectButton.IsEnabled = true;
