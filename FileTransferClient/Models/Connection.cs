@@ -157,6 +157,7 @@ namespace FileTransferClient.Models
                         fileNameBytes[i] = fileContents[i];
                     }
                     String fileName= (Encoding.ASCII.GetString(fileNameBytes)).Trim();
+                    Debug.Assert(false, fileName);
                     BinaryWriter Writer = new BinaryWriter(File.OpenWrite(folderName + "\\"+fileName));
                     byte[] fileContentsdecrypt = new byte[FILEBYTELIMIT];
                     for (int i=0; i<FILEBYTELIMIT; i++)
@@ -170,7 +171,7 @@ namespace FileTransferClient.Models
             }
             catch(Exception ex)
             {
-                Debug.Assert(false, "CRAP JUST HIT THE FAN");
+                Debug.Assert(false, ex.Message);
             }
             
         }
