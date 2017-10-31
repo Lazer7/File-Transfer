@@ -196,6 +196,7 @@ namespace FileTransferClient.Models
                     Writer.Write(fileContents);
                     Writer.Flush();
                     Writer.Close();
+                    receivingFileName = "";
                     metaData = true;
                 }
 
