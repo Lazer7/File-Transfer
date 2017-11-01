@@ -192,7 +192,7 @@ namespace FileTransferClient.Models
                             fileNameBytes[i] = fileContents[i];
                         }
                         receivingFileName = (Encoding.ASCII.GetString(fileNameBytes)).Trim();
-                        if (!receivingFileName.Equals(""))
+                        if (!receivingFileName.Equals("")&&receivingFileName.Contains("."))
                         {
                             metaData = false;
                             sendFileSendingNotification(EventArgs.Empty);
@@ -260,24 +260,25 @@ namespace FileTransferClient.Models
         {
             new Thread(() =>
             {
-                string hostName = Dns.GetHostName();
-                IPAddress[] iPAddress = Dns.GetHostAddresses(hostName);
-                String ipAddressHost = iPAddress[1].ToString();
-                ipAddressHost = ipAddressHost.Substring(0, ipAddressHost.LastIndexOf('.') + 1);
-                for (int i = 1; i < 255; i++)
-                {
-                    ProcessStartInfo processInfo = new ProcessStartInfo();
-                    processInfo.FileName = Environment.SystemDirectory + "\\PING.EXE";
-                    processInfo.Arguments = ipAddressHost + i + " -n 1";
-                    processInfo.UseShellExecute = false;
-                    processInfo.CreateNoWindow = true;
-                    Process process = new Process();
-                    process.StartInfo = processInfo;
-                    process.StartInfo.CreateNoWindow = true;
-                    process.Start();
-                }
-                sendFileSendingNotification(EventArgs.Empty);
+                    string hostName = Dns.GetHostName();
+                    IPAddress[] iPAddress = Dns.GetHostAddresses(hostName);
+                    String ipAddressHost = iPAddress[1].ToString();
+                    ipAddressHost = ipAddressHost.Substring(0, ipAddressHost.LastIndexOf('.') + 1);
+                    for (int i = 1; i < 255; i++)
+                    {
+                        ProcessStartInfo processInfo = new ProcessStartInfo();
+                        processInfo.FileName = Environment.SystemDirectory + "\\PING.EXE";
+                        processInfo.Arguments = ipAddressHost + i + " -n 1";
+                        processInfo.UseShellExecute = false;
+                        processInfo.CreateNoWindow = true;
+                        Process process = new Process();
+                        process.StartInfo = processInfo;
+                        process.StartInfo.CreateNoWindow = true;
+                        process.Start();
+                    }
+                    sendFileSendingNotification(EventArgs.Empty);
             }).Start();
+
         }
         protected virtual void sendFileSendingNotification(EventArgs e)
         {

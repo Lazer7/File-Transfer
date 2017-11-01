@@ -93,7 +93,7 @@ namespace FileTransferClient
         }
         void fileReply(object sender, EventArgs e)
         {
-            Reply = false;      
+            Reply = false;
         }
         private void DisconnectButton_Click(object sender, RoutedEventArgs e)
         {
@@ -109,7 +109,12 @@ namespace FileTransferClient
 
         void EventReached(object sender, EventArgs e)
         {
-            AvailableIPAddressListBox.ItemsSource = peerConnection.GetIpAddress();
+            this.Dispatcher.Invoke(() =>
+            {
+
+                AvailableIPAddressListBox.ItemsSource = peerConnection.GetIpAddress();
+
+            });
             peerConnection.FileSendingNotification -= EventReached;
         }
         private void Folder_Click(object sender, RoutedEventArgs e)
