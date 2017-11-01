@@ -157,7 +157,6 @@ namespace FileTransferClient.Models
                 fileContents = (byte[])obj[0];
                 Handler = (Socket)obj[1];
                 int NumberOfBytes = fileContents.Length;
-                Debug.Assert(false,  ar.CompletedSynchronously.ToString());
                 if (NumberOfBytes >= FILENAMEBYTELIMIT && metaData)
                 {
                     lock (lockMetaData)

@@ -61,11 +61,6 @@ namespace FileTransferClient
             for (int i = 0; i < fileList.Length; i++)
             {
                 peerConnection.SendFileMetaData(fileList[i]);
-
-                foreach (String ip in connectedIPAddress)
-                {
-                    peerConnection.ConnectToPeer(ip);
-                }
                 peerConnection.SendFile(fileList[i]);
 
                 foreach (String ip in connectedIPAddress)
