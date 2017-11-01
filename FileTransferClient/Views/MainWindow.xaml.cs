@@ -60,21 +60,14 @@ namespace FileTransferClient
         {
             for (int i = 0; i < fileList.Length; i++)
             {
-                String errorCheck = peerConnection.SendFileMetaData(fileList[i]);
-                if (errorCheck != null)
-                {
-                    LabelChecking.Content = errorCheck;
-                }
+                peerConnection.SendFileMetaData(fileList[i]);
+
                 foreach (String ip in connectedIPAddress)
                 {
                     peerConnection.ConnectToPeer(ip);
                 }
-                errorCheck = peerConnection.SendFile(fileList[0]);
+                peerConnection.SendFile(fileList[0]);
 
-                if (errorCheck != null)
-                {
-                    LabelChecking.Content = errorCheck;
-                }
                 foreach (String ip in connectedIPAddress)
                 {
                     peerConnection.ConnectToPeer(ip);

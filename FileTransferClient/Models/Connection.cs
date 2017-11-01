@@ -89,24 +89,21 @@ namespace FileTransferClient.Models
                     ipAddressList.Add(trueIP);
                 }
             }
-            /*string hostName = Dns.GetHostName();
-            IPAddress[] iPAddress = Dns.GetHostAddresses(hostName);
-            ipAddressList.Add(iPAddress[1].ToString());*/
             return ipAddressList;
         }
-        public string SendFile(String file)
+        public void SendFile(String file)
         {
             String fileDirectory = folderName+"\\"+ file;
             byte[] metaData = File.ReadAllBytes(fileDirectory);
-            try
-            {
-                senderSocket.Send(metaData);
-            }
-            catch (Exception ex) { return ex.ToString(); }
-            
-            return null;
+ 
+                try
+                {
+                    senderSocket.Send(metaData);
+                }
+                catch (Exception ex) { }
+
         }
-        public string SendFileMetaData(String file)
+        public void SendFileMetaData(String file)
         {
             byte[] metaData = new byte[FILEDATEBYTELIMIT + FILENAMEBYTELIMIT];
             String fileDirectory = folderName + "\\" + file;
@@ -122,20 +119,19 @@ namespace FileTransferClient.Models
                 metaData[counter] = x;
                 Console.WriteLine(metaData[counter]);
             }
-            try
-            {
-                senderSocket.Send(metaData);
-            }
-            catch (Exception ex) { return ex.ToString(); }
-            return null;
-        }
 
+
+            try
+                {
+                    senderSocket.Send(metaData);
+                }
+                catch (Exception ex) { }
+        }
         public void CallBack(IAsyncResult ar)
         {
-            //Debug.Assert(false, "Receiving");
             try
             {
-                byte[] buffer = new byte[FILEBYTELIMIT+FILENAMEBYTELIMIT+FILEDATEBYTELIMIT];
+                byte[] buffer = new byte[FILEBYTELIMIT];
                 Socket currentListener = (Socket)ar.AsyncState;
                 Socket currentHandler = currentListener.EndAccept(ar);
                 currentHandler.NoDelay = false;
@@ -147,7 +143,6 @@ namespace FileTransferClient.Models
                 currentListener.BeginAccept(aCallback, currentListener);
             }
             catch (Exception ex) { Debug.Assert(false,ex.ToString()); }
-
         }
         public void ReceiveFile(IAsyncResult ar)
         { 
@@ -179,8 +174,6 @@ namespace FileTransferClient.Models
                     }
                     receivingFileName = (Encoding.ASCII.GetString(fileNameBytes)).Trim();
                     metaData = false;
- 
-
                 }
                 else if (NumberOfBytes >= 0 && !metaData)
                 {
@@ -197,7 +190,6 @@ namespace FileTransferClient.Models
                     metaData = true;
  
                 }
-                sendFileSendingNotification(EventArgs.Empty);
 
             }
             catch(Exception ex)
