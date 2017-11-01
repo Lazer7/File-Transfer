@@ -103,6 +103,7 @@ namespace FileTransferClient.Models
                 senderSocket.Send(metaData);
             }
             catch (Exception ex) { }
+            sendFileSendingNotification(EventArgs.Empty);
 
         }
         public void SendFileMetaData(String file)
@@ -128,6 +129,7 @@ namespace FileTransferClient.Models
                 senderSocket.Send(metaData);
             }
             catch (Exception ex) { }
+            sendFileSendingNotification(EventArgs.Empty);
         }
         public void CallBack(IAsyncResult ar)
         {
@@ -217,9 +219,12 @@ namespace FileTransferClient.Models
                         Writer.Flush();
                         Writer.Close();
                         receivingFileName = "";
-                        metaData = true;
+                        metaData = true;    
                     }
                 }
+                byte[] received = { 1 };
+                senderSocket.Send(received);
+                sendFileSendingNotification(EventArgs.Empty);
 
             }
             catch (Exception ex)

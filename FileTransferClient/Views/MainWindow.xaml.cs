@@ -55,21 +55,52 @@ namespace FileTransferClient
             ConnectedIPAddressListBox.ItemsSource = connectedIPAddress;
             LabelChecking.Content = peerConnection.ConnectToPeer(ipAddress);
         }
-
+        bool dataSent;
         private void SendButton_Click(object sender, RoutedEventArgs e)
         {
+            peerConnection.FileSendingNotification += FileReached;
             for (int i = 0; i < fileList.Length; i++)
             {
-                peerConnection.SendFileMetaData(fileList[i]);
-                peerConnection.SendFile(fileList[i]);
+                dataSent = true;
+                int start = 0;
+ 
+                while (dataSent)
+                {
 
+                    Thread metadatathread = new Thread(() =>
+                    {
+                        peerConnection.SendFileMetaData(fileList[i]);
+                    });
+                   
+                    if (!metadatathread.IsAlive)
+                    {
+                        metadatathread.Start();
+                    }
+                }
+                MessageBox.Show("Metadata Sent");
+                dataSent = true;
+                while (dataSent)
+                {
+                    Thread metadatathread = new Thread(() =>
+                    {
+                        peerConnection.SendFile(fileList[i]);
+                    });
+                    if (!metadatathread.IsAlive)
+                    {
+                        metadatathread.Start();
+                    }
+                }
+                MessageBox.Show("file Sent");
                 foreach (String ip in connectedIPAddress)
                 {
                     peerConnection.ConnectToPeer(ip);
                 }
             }
         }
-
+        void FileReached(object sender, EventArgs e)
+        {
+            dataSent = false;
+        }
         private void DisconnectButton_Click(object sender, RoutedEventArgs e)
         {
             String ipAddress = (String)ConnectedIPAddressListBox.SelectedItem;
@@ -85,6 +116,7 @@ namespace FileTransferClient
         void EventReached(object sender, EventArgs e)
         {
             AvailableIPAddressListBox.ItemsSource = peerConnection.GetIpAddress();
+            peerConnection.FileSendingNotification -= EventReached;
         }
         private void Folder_Click(object sender, RoutedEventArgs e)
         {
