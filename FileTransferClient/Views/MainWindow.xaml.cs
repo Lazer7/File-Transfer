@@ -63,7 +63,7 @@ namespace FileTransferClient
             {
 
 
-
+                peerConnection.SendFileMetaData(fileList[i]);
                 MessageBox.Show("Metadata Sent");
 
                 peerConnection.SendFile(fileList[i]);
