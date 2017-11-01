@@ -188,6 +188,7 @@ namespace FileTransferClient.Models
                         {
                             metaData = false;
                         }
+                    Debug.Assert(false, "Sending data back");
                         byte[] received = { 1 };
                         senderSocket.Send(received);
                         sendFileSendingNotification(EventArgs.Empty);
