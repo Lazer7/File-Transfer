@@ -121,12 +121,10 @@ namespace FileTransferClient
         {
             String[] tempList = Directory.GetFiles(peerConnection.GetSyncFolderName());
             fileList = new List<String>();
-            int currentfile = 0;
             foreach (String file in tempList)
             {
                 String fileName = file.Substring(file.LastIndexOf('\\') + 1);
-                fileList[currentfile] = fileName;
-                currentfile++;
+                fileList.Add(fileName);
             }
 
         }
