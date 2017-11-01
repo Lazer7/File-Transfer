@@ -147,24 +147,28 @@ namespace NetWorkTesting
             ////////////////////////////////////////////////////////////////////////////////
 
             ///////////////////////////////////Threading ////////////////////////////////
-            DummyClass dummyClass = new DummyClass();
-            dummyClass.ThreshholdReached += EventReached;
-            dummyClass.startThread();
-            threadRunning = true;
-            while (threadRunning) ;
-            ///////////////////////////////////////////////////////////////////////
+            //DummyClass dummyClass = new DummyClass();
+            //dummyClass.ThreshholdReached += EventReached;
+            //dummyClass.startThread();
+            //threadRunning = true;
+            //while (threadRunning) ;
+            ///////////////////////////////////////////////////////////////////////'
+
+            Console.WriteLine(Encoding.ASCII.GetBytes("3ikjahsfjhasjfhasjhfjashfjashcjashcvjsadhujifaafdasfasdfasfasdfsafsdafsdshfjsahfjashfjashfjashcjashj").Length);
         }
+
         static void EventReached(object sender, EventArgs e)
         {
             threadRunning = false;
         }
-
     }
 
     class DummyClass
     {
         public event EventHandler ThreshholdReached;
-
+        public event EventHandler FileHit;
+        public DummyClass()
+        { FileHit += EventReached; }
         protected virtual void OnThreshholdReached(EventArgs e)
         {
             EventHandler handler = ThreshholdReached;
@@ -183,10 +187,20 @@ namespace NetWorkTesting
                 for (int i = 1; i < 10000000; i++)
                 {
                     Console.WriteLine("Hello, world");
-                    if (i % 100==0) { Console.WriteLine("FLicker"); }
+                    if (i % 10==0) {
+                        EventHandler handler = FileHit;
+                        if (handler != null)
+                        {
+                            handler(this, EventArgs.Empty);
+                        }
+                    }
                 }
                 OnThreshholdReached(EventArgs.Empty); 
             }).Start();
+        }
+        protected void EventReached(object sender, EventArgs e)
+        {
+            Console.WriteLine("Flicked");
         }
     }
 }

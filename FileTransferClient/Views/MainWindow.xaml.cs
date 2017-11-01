@@ -59,27 +59,18 @@ namespace FileTransferClient
         private void SendButton_Click(object sender, RoutedEventArgs e)
         {
 
-            for (int i = 0; i < fileList.Length; i++)
+
+            peerConnection.SendFileMetaData(fileList);
+            MessageBox.Show("Metadata Sent");
+            // peerConnection.SendFile(fileList[i]);
+            foreach (String ip in connectedIPAddress)
             {
-
-
-
-                MessageBox.Show("Metadata Sent");
-
-                peerConnection.SendFile(fileList[i]);
-
-
-                foreach (String ip in connectedIPAddress)
-                {
-                    peerConnection.ConnectToPeer(ip);
-                }
-
-
-                MessageBox.Show("file Sent");
-
+                peerConnection.ConnectToPeer(ip);
             }
-        }
+            MessageBox.Show("file Sent");
 
+
+        }
         private void DisconnectButton_Click(object sender, RoutedEventArgs e)
         {
             String ipAddress = (String)ConnectedIPAddressListBox.SelectedItem;

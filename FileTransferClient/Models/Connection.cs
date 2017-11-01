@@ -15,7 +15,7 @@ namespace FileTransferClient.Models
 
         private const int PORT = 4450;
         private const int FILEBYTELIMIT = 2000000;
-        private const int FILENAMEBYTELIMIT = 400;
+        private const int FILENAMEBYTELIMIT = 500;
         private const int FILEDATEBYTELIMIT = 100;
         private bool metaData { get; set; }
         private String folderName;
@@ -29,11 +29,12 @@ namespace FileTransferClient.Models
         private Socket senderSocket;
         private static System.Object lockBinaryWriter = new System.Object();
         private static System.Object lockMetaData = new System.Object();
-
+        private bool sendingFile;
 
         public Connection(string folderName)
         {
             this.folderName = folderName;
+            sendingFile = false;
             metaData = true;
         }
         public String GetSyncFolderName() { return folderName; }
@@ -68,6 +69,7 @@ namespace FileTransferClient.Models
                 IPEndPoint ipEndpoint = new IPEndPoint(ipAddress, PORT);
                 senderSocket = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                 senderSocket.Connect(ipEndpoint);
+                sendingFile = false;
             }
             catch (Exception ex) { return ex.ToString(); }
             return "Success";
@@ -106,29 +108,38 @@ namespace FileTransferClient.Models
                 senderSocket.Send(metaData);
             }
             catch (Exception ex) { }
+            sendingFile = true;
 
         }
-        public void SendFileMetaData(String file)
+        public void SendFileMetaData(String[] file)
         {
-            byte[] metaData = new byte[FILEDATEBYTELIMIT + FILENAMEBYTELIMIT];
-            String fileDirectory = folderName + "\\" + file;
+            byte[] metaData = new byte[FILEBYTELIMIT];
             int counter = 0;
-            foreach (byte x in Encoding.ASCII.GetBytes(file))
+            for (int i = 0; i < file.Length; )
             {
-                metaData[counter] = x;
-                counter++;
-            }
-            counter = FILENAMEBYTELIMIT;
-            foreach (byte x in Encoding.ASCII.GetBytes(File.GetLastWriteTime(fileDirectory).ToString()))
-            {
-                metaData[counter] = x;
-                Console.WriteLine(metaData[counter]);
+                String fileDirectory = folderName + "\\" + file[i];
+                foreach (byte x in Encoding.ASCII.GetBytes(file[i]))
+                {
+                    metaData[counter] = x;
+                    counter++;
+                }
+                counter +=FILENAMEBYTELIMIT;
+                foreach (byte x in Encoding.ASCII.GetBytes(File.GetLastWriteTime(fileDirectory).ToString()))
+                {
+                    metaData[counter] = x;
+                    Console.WriteLine(metaData[counter]);
+                }
+                Debug.Assert(false, file[i]);
+                i++;
+                counter = (i * FILENAMEBYTELIMIT);
+
             }
             try
             {
                 senderSocket.Send(metaData);
             }
             catch (Exception ex) { }
+            sendingFile = true;
         }
         public void CallBack(IAsyncResult ar)
         {
@@ -158,8 +169,9 @@ namespace FileTransferClient.Models
                 fileContents = (byte[])obj[0];
                 Handler = (Socket)obj[1];
                 int NumberOfBytes = fileContents.Length;
-
-
+                //if (sendingFile)
+                //{
+                //}
                 if (NumberOfBytes >= FILENAMEBYTELIMIT && metaData)
                 {
                     lock (lockMetaData)
@@ -181,12 +193,23 @@ namespace FileTransferClient.Models
                             fileNameBytes[i] = fileContents[i];
                         }
                         receivingFileName = (Encoding.ASCII.GetString(fileNameBytes)).Trim();
-                        if (!receivingFileName.Equals(""))
-                        {
-                            metaData = false;
-                        }
+                        Debug.Assert(false, receivingFileName);
+                        //if (!receivingFileName.Equals(""))
+                        //{
+                        metaData = false;
+                            //byte[] goodCommandReceived = { 0 };
+                            //senderSocket.Send(goodCommandReceived);
+                            //Debug.Assert(false, "GOOD LINE");
+                        //}
+                        //else
+                        //{
+                        //    byte[] badCommandReceived = { 1 };
+                        //    senderSocket.Send(badCommandReceived);
+                        //    Debug.Assert(false, "BAD LINE");
+                        //}
                     }
                 }
+
                 else if (NumberOfBytes >= FILEBYTELIMIT && !metaData)
                 {
                     lock (lockBinaryWriter)
@@ -196,7 +219,8 @@ namespace FileTransferClient.Models
                         {
                             Writer = new BinaryWriter(File.OpenWrite(folderName + "\\" + receivingFileName));
                         }
-                        catch {
+                        catch
+                        {
                             String[] tempList = Directory.GetFiles(folderName);
                             receivingFileName = "corruptedDownload.txt";
                             int counter = 1;
@@ -215,7 +239,7 @@ namespace FileTransferClient.Models
                         {
                             fileContentsdecrypt[i] = fileContents[i];
                         }
-                        
+
                         Writer.Write(fileContents);
                         Writer.Flush();
                         Writer.Close();
