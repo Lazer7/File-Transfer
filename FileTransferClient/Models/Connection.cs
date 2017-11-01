@@ -151,17 +151,14 @@ namespace FileTransferClient.Models
         {
             //GetEnvironmentString
             byte[] fileContents = null;
-            //try
-            //{
-                
+            try
+            {
+
                 object[] obj = (object[])ar.AsyncState;
                 fileContents = (byte[])obj[0];
                 Handler = (Socket)obj[1];
                 int NumberOfBytes = fileContents.Length;
-            if (fileContents[0] != 1)
-            {
-                ConnectToPeer(currentIP);
-            }
+
 
                 if (NumberOfBytes >= FILENAMEBYTELIMIT && metaData)
                 {
@@ -188,10 +185,6 @@ namespace FileTransferClient.Models
                         {
                             metaData = false;
                         }
-                    Debug.Assert(false, "Sending data back");
-                        byte[] received = { 1 };
-                        senderSocket.Send(received);
-                        sendFileSendingNotification(EventArgs.Empty);
                     }
                 }
                 else if (NumberOfBytes >= FILEBYTELIMIT && !metaData)
@@ -228,20 +221,17 @@ namespace FileTransferClient.Models
                         Writer.Close();
                         receivingFileName = "";
                         metaData = true;
-                    byte[] received = { 1 };
-                        senderSocket.Send(received);
-                        sendFileSendingNotification(EventArgs.Empty);
                     }
                 }
 
 
-            //}
-            //catch (Exception ex)
-            //{
-            //    Debug.Assert(false, ex.Message);
-            //}
-
         }
+            catch (Exception ex)
+            {
+                Debug.Assert(false, ex.Message);
+            }
+
+}
         public void PingAddress()
         {
             new Thread(() =>

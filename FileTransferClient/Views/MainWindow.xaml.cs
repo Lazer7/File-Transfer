@@ -58,54 +58,28 @@ namespace FileTransferClient
         bool dataSent;
         private void SendButton_Click(object sender, RoutedEventArgs e)
         {
-            peerConnection.FileSendingNotification += FileReached;
+
             for (int i = 0; i < fileList.Length; i++)
             {
-                dataSent = true;
-                int start = 0;
-                peerConnection.currentIP = connectedIPAddress[0];
-                while (dataSent)
-                {
 
-                    Thread metadatathread = new Thread(() =>
-                    {
-                        peerConnection.SendFileMetaData(fileList[i]);
-                        foreach (String ip in connectedIPAddress)
-                        {
-                            peerConnection.ConnectToPeer(ip);
-                        }
-                    });
-                   
-                    if (!metadatathread.IsAlive)
-                    {
-                        metadatathread.Start();
-                    }
-                }
+
+
                 MessageBox.Show("Metadata Sent");
-                dataSent = true;
-                while (dataSent)
+
+                peerConnection.SendFile(fileList[i]);
+
+
+                foreach (String ip in connectedIPAddress)
                 {
-                    Thread metadatathread = new Thread(() =>
-                    {
-                        peerConnection.SendFile(fileList[i]);
-                    });
-                    if (!metadatathread.IsAlive)
-                    {
-                        metadatathread.Start();
-                        foreach (String ip in connectedIPAddress)
-                        {
-                            peerConnection.ConnectToPeer(ip);
-                        }
-                    }
+                    peerConnection.ConnectToPeer(ip);
                 }
+
+
                 MessageBox.Show("file Sent");
 
             }
         }
-        void FileReached(object sender, EventArgs e)
-        {
-            dataSent = false;
-        }
+
         private void DisconnectButton_Click(object sender, RoutedEventArgs e)
         {
             String ipAddress = (String)ConnectedIPAddressListBox.SelectedItem;
