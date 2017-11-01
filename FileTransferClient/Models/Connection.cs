@@ -5,12 +5,12 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 
 namespace FileTransferClient.Models
 {
     public class Connection
     {
-        public bool mailedFile { get; set; }
 
         private const int PORT = 4450;
         private const int FILEBYTELIMIT = 2000000;
@@ -130,9 +130,6 @@ namespace FileTransferClient.Models
             return null;
         }
 
-
-
-
         public void CallBack(IAsyncResult ar)
         {
             //Debug.Assert(false, "Receiving");
@@ -182,7 +179,7 @@ namespace FileTransferClient.Models
                     }
                     receivingFileName = (Encoding.ASCII.GetString(fileNameBytes)).Trim();
                     metaData = false;
-                    mailedFile = false;
+ 
 
                 }
                 else if (NumberOfBytes >= 0 && !metaData)
@@ -198,7 +195,7 @@ namespace FileTransferClient.Models
                     Writer.Close();
                     receivingFileName = "";
                     metaData = true;
-                    mailedFile = false;
+ 
                 }
                 sendFileSendingNotification(EventArgs.Empty);
 
@@ -211,22 +208,26 @@ namespace FileTransferClient.Models
         }
         public void PingAddress()
         {
-            string hostName = Dns.GetHostName();
-            IPAddress[] iPAddress = Dns.GetHostAddresses(hostName);
-            String ipAddressHost = iPAddress[1].ToString();
-            ipAddressHost = ipAddressHost.Substring(0, ipAddressHost.LastIndexOf('.') + 1);
-            for (int i = 1; i < 255; i++)
+            new Thread(() =>
             {
-                ProcessStartInfo processInfo = new ProcessStartInfo();
-                processInfo.FileName = Environment.SystemDirectory + "\\PING.EXE";
-                processInfo.Arguments = ipAddressHost + i + " -n 1";
-                processInfo.UseShellExecute = false;
-                processInfo.CreateNoWindow = true;
-                Process process = new Process();
-                process.StartInfo = processInfo;
-                process.StartInfo.CreateNoWindow = true;
-                process.Start();
-            }
+                string hostName = Dns.GetHostName();
+                IPAddress[] iPAddress = Dns.GetHostAddresses(hostName);
+                String ipAddressHost = iPAddress[1].ToString();
+                ipAddressHost = ipAddressHost.Substring(0, ipAddressHost.LastIndexOf('.') + 1);
+                for (int i = 1; i < 255; i++)
+                {
+                    ProcessStartInfo processInfo = new ProcessStartInfo();
+                    processInfo.FileName = Environment.SystemDirectory + "\\PING.EXE";
+                    processInfo.Arguments = ipAddressHost + i + " -n 1";
+                    processInfo.UseShellExecute = false;
+                    processInfo.CreateNoWindow = true;
+                    Process process = new Process();
+                    process.StartInfo = processInfo;
+                    process.StartInfo.CreateNoWindow = true;
+                    process.Start();
+                }
+                sendFileSendingNotification(EventArgs.Empty);
+            }).Start();
         }
         protected virtual void sendFileSendingNotification(EventArgs e)
         {

@@ -91,9 +91,13 @@ namespace FileTransferClient
         private void Refresh_Click(object sender, RoutedEventArgs e)
         {
             peerConnection.PingAddress();
-            AvailableIPAddressListBox.ItemsSource = peerConnection.GetIpAddress();
+            peerConnection.FileSendingNotification += EventReached;
         }
 
+        void EventReached(object sender, EventArgs e)
+        {
+            AvailableIPAddressListBox.ItemsSource = peerConnection.GetIpAddress();
+        }
         private void Folder_Click(object sender, RoutedEventArgs e)
         {
 
