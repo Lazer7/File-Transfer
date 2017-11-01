@@ -77,15 +77,17 @@ namespace FileTransferClient
                 }
 
                 peerConnection.SendFile(fileList[i]);
-                
+                while (Reply) ;
+                MessageBox.Show("file Sent");
+                if (!peerConnection.GoodReceive)
+                {
+                    i--;
+                    continue;
+                }
                 foreach (String ip in connectedIPAddress)
                 {
                     peerConnection.ConnectToPeer(ip);
                 }
-
-
-                MessageBox.Show("file Sent");
-
             }
             peerConnection.FileSendingNotification -= fileReply;
         }
