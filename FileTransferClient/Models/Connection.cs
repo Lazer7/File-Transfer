@@ -178,7 +178,10 @@ namespace FileTransferClient.Models
                             fileNameBytes[i] = fileContents[i];
                         }
                         receivingFileName = (Encoding.ASCII.GetString(fileNameBytes)).Trim();
-                        metaData = false;
+                        if (!receivingFileName.Equals(""))
+                        {
+                            metaData = false;
+                        }
                     }
                 }
                 else if (NumberOfBytes >= FILEBYTELIMIT && !metaData)
