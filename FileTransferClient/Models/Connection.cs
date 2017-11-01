@@ -11,6 +11,7 @@ namespace FileTransferClient.Models
 {
     public class Connection
     {
+        public string currentIP{ get; set; }
 
         private const int PORT = 4450;
         private const int FILEBYTELIMIT = 2000000;
@@ -28,6 +29,8 @@ namespace FileTransferClient.Models
         private Socket senderSocket;
         private static System.Object lockBinaryWriter = new System.Object();
         private static System.Object lockMetaData = new System.Object();
+
+
         public Connection(string folderName)
         {
             this.folderName = folderName;
@@ -148,13 +151,18 @@ namespace FileTransferClient.Models
         {
             //GetEnvironmentString
             byte[] fileContents = null;
-            try
-            {
-
+            //try
+            //{
+                
                 object[] obj = (object[])ar.AsyncState;
                 fileContents = (byte[])obj[0];
                 Handler = (Socket)obj[1];
                 int NumberOfBytes = fileContents.Length;
+            if (fileContents[0] != 1)
+            {
+                ConnectToPeer(currentIP);
+            }
+
                 if (NumberOfBytes >= FILENAMEBYTELIMIT && metaData)
                 {
                     lock (lockMetaData)
@@ -180,6 +188,9 @@ namespace FileTransferClient.Models
                         {
                             metaData = false;
                         }
+                        byte[] received = { 1 };
+                        senderSocket.Send(received);
+                        sendFileSendingNotification(EventArgs.Empty);
                     }
                 }
                 else if (NumberOfBytes >= FILEBYTELIMIT && !metaData)
@@ -215,18 +226,19 @@ namespace FileTransferClient.Models
                         Writer.Flush();
                         Writer.Close();
                         receivingFileName = "";
-                        metaData = true;    
+                        metaData = true;
+                    byte[] received = { 1 };
+                        senderSocket.Send(received);
+                        sendFileSendingNotification(EventArgs.Empty);
                     }
                 }
-                byte[] received = { 1 };
-                senderSocket.Send(received);
-                sendFileSendingNotification(EventArgs.Empty);
 
-            }
-            catch (Exception ex)
-            {
-                Debug.Assert(false, ex.Message);
-            }
+
+            //}
+            //catch (Exception ex)
+            //{
+            //    Debug.Assert(false, ex.Message);
+            //}
 
         }
         public void PingAddress()

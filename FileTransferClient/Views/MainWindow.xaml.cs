@@ -63,7 +63,7 @@ namespace FileTransferClient
             {
                 dataSent = true;
                 int start = 0;
- 
+                peerConnection.currentIP = connectedIPAddress[0];
                 while (dataSent)
                 {
 
