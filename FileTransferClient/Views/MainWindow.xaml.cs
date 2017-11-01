@@ -31,7 +31,7 @@ namespace FileTransferClient
         //Contains list of connected IPAddresses
         List<String> connectedIPAddress;
         //Contains list of all files in the specified directory
-        List<String> fileList;
+        String[] fileList;
 
         public MainWindow()
         {
@@ -59,18 +59,27 @@ namespace FileTransferClient
         private void SendButton_Click(object sender, RoutedEventArgs e)
         {
 
-
-            peerConnection.SendFileMetaData(fileList);
-            MessageBox.Show("Metadata Sent");
-            // peerConnection.SendFile(fileList[i]);
-            foreach (String ip in connectedIPAddress)
+            for (int i = 0; i < fileList.Length; i++)
             {
-                peerConnection.ConnectToPeer(ip);
+
+
+
+                MessageBox.Show("Metadata Sent");
+
+                peerConnection.SendFile(fileList[i]);
+
+
+                foreach (String ip in connectedIPAddress)
+                {
+                    peerConnection.ConnectToPeer(ip);
+                }
+
+
+                MessageBox.Show("file Sent");
+
             }
-            MessageBox.Show("file Sent");
-
-
         }
+
         private void DisconnectButton_Click(object sender, RoutedEventArgs e)
         {
             String ipAddress = (String)ConnectedIPAddressListBox.SelectedItem;
@@ -120,11 +129,14 @@ namespace FileTransferClient
         private void GetFileNames()
         {
             String[] tempList = Directory.GetFiles(peerConnection.GetSyncFolderName());
-            fileList = new List<String>();
+            fileList = new String[tempList.Length];
+            int currentfile = 0;
             foreach (String file in tempList)
             {
                 String fileName = file.Substring(file.LastIndexOf('\\') + 1);
-                fileList.Add(fileName);
+                Console.WriteLine(fileName);
+                fileList[currentfile] = fileName;
+                currentfile++;
             }
 
         }
