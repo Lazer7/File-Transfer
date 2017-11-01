@@ -70,6 +70,10 @@ namespace FileTransferClient
                     Thread metadatathread = new Thread(() =>
                     {
                         peerConnection.SendFileMetaData(fileList[i]);
+                        foreach (String ip in connectedIPAddress)
+                        {
+                            peerConnection.ConnectToPeer(ip);
+                        }
                     });
                    
                     if (!metadatathread.IsAlive)
@@ -88,13 +92,14 @@ namespace FileTransferClient
                     if (!metadatathread.IsAlive)
                     {
                         metadatathread.Start();
+                        foreach (String ip in connectedIPAddress)
+                        {
+                            peerConnection.ConnectToPeer(ip);
+                        }
                     }
                 }
                 MessageBox.Show("file Sent");
-                foreach (String ip in connectedIPAddress)
-                {
-                    peerConnection.ConnectToPeer(ip);
-                }
+
             }
         }
         void FileReached(object sender, EventArgs e)

@@ -103,7 +103,6 @@ namespace FileTransferClient.Models
                 senderSocket.Send(metaData);
             }
             catch (Exception ex) { }
-            sendFileSendingNotification(EventArgs.Empty);
 
         }
         public void SendFileMetaData(String file)
@@ -122,14 +121,11 @@ namespace FileTransferClient.Models
                 metaData[counter] = x;
                 Console.WriteLine(metaData[counter]);
             }
-
-
             try
             {
                 senderSocket.Send(metaData);
             }
             catch (Exception ex) { }
-            sendFileSendingNotification(EventArgs.Empty);
         }
         public void CallBack(IAsyncResult ar)
         {
