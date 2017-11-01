@@ -32,7 +32,7 @@ namespace FileTransferClient
         List<String> connectedIPAddress;
         //Contains list of all files in the specified directory
         String[] fileList;
-
+        bool Reply;
         public MainWindow()
         {
             InitializeComponent();
@@ -55,20 +55,29 @@ namespace FileTransferClient
             ConnectedIPAddressListBox.ItemsSource = connectedIPAddress;
             LabelChecking.Content = peerConnection.ConnectToPeer(ipAddress);
         }
-        bool dataSent;
+
         private void SendButton_Click(object sender, RoutedEventArgs e)
         {
-
+            peerConnection.FileSendingNotification += fileReply;
             for (int i = 0; i < fileList.Length; i++)
             {
-
+                Reply = true;
 
                 peerConnection.SendFileMetaData(fileList[i]);
+                while (Reply) ;
                 MessageBox.Show("Metadata Sent");
+                if (!peerConnection.GoodReceive)
+                {
+                    i--;
+                    continue;
+                }
+                foreach (String ip in connectedIPAddress)
+                {
+                    peerConnection.ConnectToPeer(ip);
+                }
 
                 peerConnection.SendFile(fileList[i]);
-
-
+                
                 foreach (String ip in connectedIPAddress)
                 {
                     peerConnection.ConnectToPeer(ip);
@@ -78,8 +87,12 @@ namespace FileTransferClient
                 MessageBox.Show("file Sent");
 
             }
+            peerConnection.FileSendingNotification -= fileReply;
         }
-
+        void fileReply(object sender, EventArgs e)
+        {
+            Reply = false;      
+        }
         private void DisconnectButton_Click(object sender, RoutedEventArgs e)
         {
             String ipAddress = (String)ConnectedIPAddressListBox.SelectedItem;
@@ -109,6 +122,7 @@ namespace FileTransferClient
                 open.Dispose();
             }
             ///////////////////////////////////////////////////////////////
+            peerConnection.FileSendingNotification += Reconnect;
             //Ping all ip addressses on the network
             peerConnection.PingAddress();
             //Creates a socket listener for this client
@@ -125,6 +139,13 @@ namespace FileTransferClient
             ConnectingB.IsEnabled = true;
             RefreshButton.IsEnabled = true;
             SendButton.IsEnabled = true;
+        }
+        private void Reconnect(object sender, EventArgs e)
+        {
+            foreach (String ip in connectedIPAddress)
+            {
+                peerConnection.ConnectToPeer(ip);
+            }
         }
         private void GetFileNames()
         {

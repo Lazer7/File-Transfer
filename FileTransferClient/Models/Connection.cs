@@ -29,11 +29,14 @@ namespace FileTransferClient.Models
         private Socket senderSocket;
         private static System.Object lockBinaryWriter = new System.Object();
         private static System.Object lockMetaData = new System.Object();
+        private bool sendingfile;
+        public bool GoodReceive { get; set; }
 
 
         public Connection(string folderName)
         {
             this.folderName = folderName;
+            sendingfile = false;
             metaData = true;
         }
         public String GetSyncFolderName() { return folderName; }
@@ -106,6 +109,7 @@ namespace FileTransferClient.Models
                 senderSocket.Send(metaData);
             }
             catch (Exception ex) { }
+            sendingfile = true;
 
         }
         public void SendFileMetaData(String file)
@@ -129,6 +133,7 @@ namespace FileTransferClient.Models
                 senderSocket.Send(metaData);
             }
             catch (Exception ex) { }
+            sendingfile = true;
         }
         public void CallBack(IAsyncResult ar)
         {
@@ -159,8 +164,14 @@ namespace FileTransferClient.Models
                 Handler = (Socket)obj[1];
                 int NumberOfBytes = fileContents.Length;
 
-
-                if (NumberOfBytes >= FILENAMEBYTELIMIT && metaData)
+                if (sendingfile)
+                {
+                    sendFileSendingNotification(EventArgs.Empty);
+                    if (fileContents[0] == 1) { GoodReceive = true; }
+                    else { GoodReceive = false; }
+                    sendingfile = false;
+                }
+                else if (NumberOfBytes >= FILENAMEBYTELIMIT && metaData)
                 {
                     lock (lockMetaData)
                     {
@@ -184,7 +195,18 @@ namespace FileTransferClient.Models
                         if (!receivingFileName.Equals(""))
                         {
                             metaData = false;
+                            sendFileSendingNotification(EventArgs.Empty);
+                            byte[] reply = { 1 };
+                            senderSocket.Send(reply);
+                            Debug.Assert(false,receivingFileName);
                         }
+                        else
+                        {
+                            sendFileSendingNotification(EventArgs.Empty);
+                            byte[] reply = { 0 };
+                            senderSocket.Send(reply);
+                        }
+
                     }
                 }
                 else if (NumberOfBytes >= FILEBYTELIMIT && !metaData)
@@ -196,7 +218,8 @@ namespace FileTransferClient.Models
                         {
                             Writer = new BinaryWriter(File.OpenWrite(folderName + "\\" + receivingFileName));
                         }
-                        catch {
+                        catch
+                        {
                             String[] tempList = Directory.GetFiles(folderName);
                             receivingFileName = "corruptedDownload.txt";
                             int counter = 1;
@@ -215,7 +238,7 @@ namespace FileTransferClient.Models
                         {
                             fileContentsdecrypt[i] = fileContents[i];
                         }
-                        
+
                         Writer.Write(fileContents);
                         Writer.Flush();
                         Writer.Close();
@@ -232,6 +255,7 @@ namespace FileTransferClient.Models
             }
 
 }
+
         public void PingAddress()
         {
             new Thread(() =>
@@ -263,7 +287,7 @@ namespace FileTransferClient.Models
                 handler(this, e);
             }
         }
-
+       
 
     }
 
