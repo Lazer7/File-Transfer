@@ -10,6 +10,8 @@ namespace FileTransferClient.Models
 {
     public class Connection
     {
+        public bool mailedFile { get; set; }
+
         private const int PORT = 4450;
         private const int FILEBYTELIMIT = 2000000;
         private const int FILENAMEBYTELIMIT = 400;
@@ -17,11 +19,11 @@ namespace FileTransferClient.Models
         private bool metaData { get; set; }
         private String folderName;
         private String receivingFileName;
-        private SocketPermission permission;
         //This Computer
         private Socket Listener;
         private IPEndPoint endpoint;
         private Socket Handler;
+        public event Action FileSendingNotification;
         //Connecting to Other Computer
         private Socket senderSocket;
         public Connection(string folderName)
@@ -179,7 +181,8 @@ namespace FileTransferClient.Models
                         fileNameBytes[i] = fileContents[i];
                     }
                     receivingFileName = (Encoding.ASCII.GetString(fileNameBytes)).Trim();
-                    metaData = false; 
+                    metaData = false;
+                    mailedFile = false;
 
                 }
                 else if (NumberOfBytes >= 0 && !metaData)
@@ -195,7 +198,9 @@ namespace FileTransferClient.Models
                     Writer.Close();
                     receivingFileName = "";
                     metaData = true;
+                    mailedFile = false;
                 }
+               
 
             }
             catch(Exception ex)
@@ -219,6 +224,7 @@ namespace FileTransferClient.Models
                 processInfo.CreateNoWindow = true;
                 Process process = new Process();
                 process.StartInfo = processInfo;
+                process.StartInfo.CreateNoWindow = true;
                 process.Start();
             }
         }

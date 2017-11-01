@@ -57,9 +57,9 @@ namespace FileTransferClient
 
         private void SendButton_Click(object sender, RoutedEventArgs e)
         {
-            for (int i = 0; i < fileList.Length; i++)
-            {
-                String errorCheck = peerConnection.SendFileMetaData(fileList[i]);
+           // for (int i = 0; i < fileList.Length; i++)
+          //  {
+                String errorCheck = peerConnection.SendFileMetaData(fileList[0]);
 
                 if (errorCheck != null)
                 {
@@ -78,7 +78,7 @@ namespace FileTransferClient
                 {
                     peerConnection.ConnectToPeer(ip);
                 }
-            }
+           // }
         }
 
         private void DisconnectButton_Click(object sender, RoutedEventArgs e)
@@ -132,7 +132,6 @@ namespace FileTransferClient
                 String fileName = file.Substring(file.LastIndexOf('\\') + 1);
                 Console.WriteLine(fileName);
                 fileList[currentfile] = fileName;
-                MessageBox.Show(fileList[currentfile]);
                 currentfile++;
             }
 

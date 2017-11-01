@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace NetWorkTesting
@@ -15,6 +16,7 @@ namespace NetWorkTesting
         private const int FILEBYTELIMIT = 2000000;
         private const int FILENAMEBYTELIMIT = 400;
         private const int FILEDATEBYTLELIMIT = 100;
+        private static bool threadRunning;
         static void Main(string[] args)
         {
 
@@ -95,58 +97,96 @@ namespace NetWorkTesting
 
 
             ////////////////////////Byte Reading /////////////////////////////////////////////
-            String fileDirectory = "C:\\Users\\Jimmy\\Desktop\\Client1\\Helloworld.txt";
-            String file = "Helloworld.txt";
-            byte[] metaData = new byte[FILEBYTELIMIT + FILEDATEBYTLELIMIT + FILENAMEBYTELIMIT];
-            int counter = 0;
-            foreach (byte x in File.ReadAllBytes(fileDirectory))
-            {
-                metaData[counter] = x;
-                Console.Write(metaData[counter]);
-                counter++;
-            }
+            //String fileDirectory = "C:\\Users\\Jimmy\\Desktop\\Client1\\Helloworld.txt";
+            //String file = "Helloworld.txt";
+            //byte[] metaData = new byte[FILEBYTELIMIT + FILEDATEBYTLELIMIT + FILENAMEBYTELIMIT];
+            //int counter = 0;
+            //foreach (byte x in File.ReadAllBytes(fileDirectory))
+            //{
+            //    metaData[counter] = x;
+            //    Console.Write(metaData[counter]);
+            //    counter++;
+            //}
 
-            counter = FILEBYTELIMIT;
+            //counter = FILEBYTELIMIT;
 
-            foreach (byte x in Encoding.ASCII.GetBytes(file))
-            {
+            //foreach (byte x in Encoding.ASCII.GetBytes(file))
+            //{
 
-                metaData[counter] = x;
-                counter++;
+            //    metaData[counter] = x;
+            //    counter++;
 
-            }
-            counter = FILEBYTELIMIT + FILENAMEBYTELIMIT;
-            foreach (byte x in Encoding.ASCII.GetBytes(File.GetLastWriteTime(fileDirectory).ToString()))
-            {
-                metaData[counter] = x;
-                Console.WriteLine(metaData[counter]);
-            }
-            // byte date = Convert.ToByte(File.GetLastWriteTime("C:\\Users\\Jimmy\\Desktop\\Client1\\ahri.jpg"));
-            //Console.WriteLine(File.GetLastWriteTime("C:\\Users\\Jimmy\\Desktop\\Client1\\ahri.jpg"));
-            //  DateTime x2 = DateTime.Parse("5/23/2017 1:28:02 PM");
-
-
-
-            int spaces = 0;
-            int stringSize = 0;
-            for (int i = FILEBYTELIMIT; i < FILEBYTELIMIT + FILENAMEBYTELIMIT; i++)
-            {
-                if (metaData[i] == 0)
-                {
-                    spaces++;
-                }
-                if (spaces == 5) { break; }
-                stringSize++;
-            }
-            byte[] fileNameBytes = new byte[stringSize];
-            for (int i = FILEBYTELIMIT; i < FILEBYTELIMIT + stringSize; i++)
-            {
-                fileNameBytes[i - FILEBYTELIMIT] = metaData[i];
-            }
-            String fileName = (Encoding.ASCII.GetString(fileNameBytes)).Trim();
-            Console.Write(fileName);
+            //}
+            //counter = FILEBYTELIMIT + FILENAMEBYTELIMIT;
+            //foreach (byte x in Encoding.ASCII.GetBytes(File.GetLastWriteTime(fileDirectory).ToString()))
+            //{
+            //    metaData[counter] = x;
+            //    Console.WriteLine(metaData[counter]);
+            //}
+            //// byte date = Convert.ToByte(File.GetLastWriteTime("C:\\Users\\Jimmy\\Desktop\\Client1\\ahri.jpg"));
+            ////Console.WriteLine(File.GetLastWriteTime("C:\\Users\\Jimmy\\Desktop\\Client1\\ahri.jpg"));
+            ////  DateTime x2 = DateTime.Parse("5/23/2017 1:28:02 PM");
+            //int spaces = 0;
+            //int stringSize = 0;
+            //for (int i = FILEBYTELIMIT; i < FILEBYTELIMIT + FILENAMEBYTELIMIT; i++)
+            //{
+            //    if (metaData[i] == 0)
+            //    {
+            //        spaces++;
+            //    }
+            //    if (spaces == 5) { break; }
+            //    stringSize++;
+            //}
+            //byte[] fileNameBytes = new byte[stringSize];
+            //for (int i = FILEBYTELIMIT; i < FILEBYTELIMIT + stringSize; i++)
+            //{
+            //    fileNameBytes[i - FILEBYTELIMIT] = metaData[i];
+            //}
+            //String fileName = (Encoding.ASCII.GetString(fileNameBytes)).Trim();
+            //Console.Write(fileName);
             ////////////////////////////////////////////////////////////////////////////////
 
+            ///////////////////////////////////Threading ////////////////////////////////
+            DummyClass dummyClass = new DummyClass();
+            dummyClass.ThreshholdReached += EventReached;
+            dummyClass.startThread();
+            threadRunning = true;
+            while (threadRunning) ;
+            ///////////////////////////////////////////////////////////////////////
+        }
+        static void EventReached(object sender, EventArgs e)
+        {
+            threadRunning = false;
+        }
+
+    }
+
+    class DummyClass
+    {
+        public event EventHandler ThreshholdReached;
+
+        protected virtual void OnThreshholdReached(EventArgs e)
+        {
+            EventHandler handler = ThreshholdReached;
+            if (handler != null)
+            {
+                handler(this, e);
+            }
+        }
+        public void startThread()
+        {
+            new Thread(() =>
+            {
+
+                Thread.CurrentThread.IsBackground = true;
+                /* run your code here */
+                for (int i = 1; i < 10000000; i++)
+                {
+                    Console.WriteLine("Hello, world");
+                    if (i % 100==0) { Console.WriteLine("FLicker"); }
+                }
+                OnThreshholdReached(EventArgs.Empty); 
+            }).Start();
         }
     }
 }
