@@ -26,6 +26,8 @@ namespace FileTransferClient.Models
         public event EventHandler FileSendingNotification;
         //Connecting to Other Computer
         private Socket senderSocket;
+        private static System.Object lockThis = new System.Object();
+
         public Connection(string folderName)
         {
             this.folderName = folderName;
@@ -177,18 +179,20 @@ namespace FileTransferClient.Models
                 }
                 else if (NumberOfBytes >= 0 && !metaData)
                 {
-                    BinaryWriter Writer = new BinaryWriter(File.OpenWrite(folderName + "\\" + receivingFileName));
-                    byte[] fileContentsdecrypt = new byte[FILEBYTELIMIT];
-                    for (int i = 0; i < FILEBYTELIMIT; i++)
+                    lock (lockThis)
                     {
-                        fileContentsdecrypt[i] = fileContents[i];
+                        BinaryWriter Writer = new BinaryWriter(File.OpenWrite(folderName + "\\" + receivingFileName));
+                        byte[] fileContentsdecrypt = new byte[FILEBYTELIMIT];
+                        for (int i = 0; i < FILEBYTELIMIT; i++)
+                        {
+                            fileContentsdecrypt[i] = fileContents[i];
+                        }
+                        Writer.Write(fileContents);
+                        Writer.Flush();
+                        Writer.Close();
+                        receivingFileName = "";
+                        metaData = true;
                     }
-                    Writer.Write(fileContents);
-                    Writer.Flush();
-                    Writer.Close();
-                    receivingFileName = "";
-                    metaData = true;
- 
                 }
 
             }
