@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -57,10 +58,9 @@ namespace FileTransferClient
 
         private void SendButton_Click(object sender, RoutedEventArgs e)
         {
-           // for (int i = 0; i < fileList.Length; i++)
-          //  {
-                String errorCheck = peerConnection.SendFileMetaData(fileList[0]);
-
+            for (int i = 0; i < fileList.Length; i++)
+            {
+                String errorCheck = peerConnection.SendFileMetaData(fileList[i]);
                 if (errorCheck != null)
                 {
                     LabelChecking.Content = errorCheck;
@@ -70,6 +70,7 @@ namespace FileTransferClient
                     peerConnection.ConnectToPeer(ip);
                 }
                 errorCheck = peerConnection.SendFile(fileList[0]);
+
                 if (errorCheck != null)
                 {
                     LabelChecking.Content = errorCheck;
@@ -78,12 +79,12 @@ namespace FileTransferClient
                 {
                     peerConnection.ConnectToPeer(ip);
                 }
-           // }
+            }
         }
 
         private void DisconnectButton_Click(object sender, RoutedEventArgs e)
         {
-            String ipAddress = (String) ConnectedIPAddressListBox.SelectedItem;
+            String ipAddress = (String)ConnectedIPAddressListBox.SelectedItem;
             connectedIPAddress.Remove(ipAddress);
         }
 
@@ -124,7 +125,7 @@ namespace FileTransferClient
         }
         private void GetFileNames()
         {
-            String[] tempList =Directory.GetFiles(peerConnection.GetSyncFolderName());
+            String[] tempList = Directory.GetFiles(peerConnection.GetSyncFolderName());
             fileList = new String[tempList.Length];
             int currentfile = 0;
             foreach (String file in tempList)

@@ -23,7 +23,7 @@ namespace FileTransferClient.Models
         private Socket Listener;
         private IPEndPoint endpoint;
         private Socket Handler;
-        public event Action FileSendingNotification;
+        public event EventHandler FileSendingNotification;
         //Connecting to Other Computer
         private Socket senderSocket;
         public Connection(string folderName)
@@ -200,7 +200,7 @@ namespace FileTransferClient.Models
                     metaData = true;
                     mailedFile = false;
                 }
-               
+                sendFileSendingNotification(EventArgs.Empty);
 
             }
             catch(Exception ex)
@@ -228,7 +228,14 @@ namespace FileTransferClient.Models
                 process.Start();
             }
         }
-
+        protected virtual void sendFileSendingNotification(EventArgs e)
+        {
+            EventHandler handler = FileSendingNotification;
+            if (handler != null)
+            {
+                handler(this, e);
+            }
+        }
 
 
     }
