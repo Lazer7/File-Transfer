@@ -26,8 +26,8 @@ namespace FileTransferClient.Models
         public event EventHandler FileSendingNotification;
         //Connecting to Other Computer
         private Socket senderSocket;
-        private static System.Object lockThis = new System.Object();
-
+        private static System.Object lockBinaryWriter = new System.Object();
+        private static System.Object lockMetaData = new System.Object();
         public Connection(string folderName)
         {
             this.folderName = folderName;
@@ -95,14 +95,14 @@ namespace FileTransferClient.Models
         }
         public void SendFile(String file)
         {
-            String fileDirectory = folderName+"\\"+ file;
+            String fileDirectory = folderName + "\\" + file;
             byte[] metaData = File.ReadAllBytes(fileDirectory);
- 
-                try
-                {
-                    senderSocket.Send(metaData);
-                }
-                catch (Exception ex) { }
+
+            try
+            {
+                senderSocket.Send(metaData);
+            }
+            catch (Exception ex) { }
 
         }
         public void SendFileMetaData(String file)
@@ -124,10 +124,10 @@ namespace FileTransferClient.Models
 
 
             try
-                {
-                    senderSocket.Send(metaData);
-                }
-                catch (Exception ex) { }
+            {
+                senderSocket.Send(metaData);
+            }
+            catch (Exception ex) { }
         }
         public void CallBack(IAsyncResult ar)
         {
@@ -138,55 +138,79 @@ namespace FileTransferClient.Models
                 Socket currentHandler = currentListener.EndAccept(ar);
                 currentHandler.NoDelay = false;
                 object[] obj = new object[2];
-                obj[0]= buffer;
-                obj[1]=currentHandler ;
+                obj[0] = buffer;
+                obj[1] = currentHandler;
                 currentHandler.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveFile), obj);
                 AsyncCallback aCallback = new AsyncCallback(CallBack);
                 currentListener.BeginAccept(aCallback, currentListener);
             }
-            catch (Exception ex) { Debug.Assert(false,ex.ToString()); }
+            catch (Exception ex) { Debug.Assert(false, ex.ToString()); }
         }
         public void ReceiveFile(IAsyncResult ar)
-        { 
+        {
             //GetEnvironmentString
-            byte[] fileContents=null; 
+            byte[] fileContents = null;
             try
             {
+
                 object[] obj = (object[])ar.AsyncState;
                 fileContents = (byte[])obj[0];
                 Handler = (Socket)obj[1];
                 int NumberOfBytes = fileContents.Length;
-                if (NumberOfBytes >= 0 && metaData)
+                Debug.Assert(false,  ar.CompletedSynchronously.ToString());
+                if (NumberOfBytes >= FILENAMEBYTELIMIT && metaData)
                 {
-                    int spaces = 0;
-                    int stringSize = 0;
-                    for (int i = 0; i < FILENAMEBYTELIMIT; i++)
+                    lock (lockMetaData)
                     {
-                        if (fileContents[i] == 0)
+                        int spaces = 0;
+                        int stringSize = 0;
+                        for (int i = 0; i < FILENAMEBYTELIMIT; i++)
                         {
-                            spaces++;
+                            if (fileContents[i] == 0)
+                            {
+                                spaces++;
+                            }
+                            if (spaces == 1) { break; }
+                            stringSize++;
                         }
-                        if (spaces == 1) { break; }
-                        stringSize++;
+                        byte[] fileNameBytes = new byte[stringSize];
+                        for (int i = 0; i < stringSize; i++)
+                        {
+                            fileNameBytes[i] = fileContents[i];
+                        }
+                        receivingFileName = (Encoding.ASCII.GetString(fileNameBytes)).Trim();
+                        metaData = false;
                     }
-                    byte[] fileNameBytes = new byte[stringSize];
-                    for (int i = 0; i < stringSize; i++)
-                    {
-                        fileNameBytes[i] = fileContents[i];
-                    }
-                    receivingFileName = (Encoding.ASCII.GetString(fileNameBytes)).Trim();
-                    metaData = false;
                 }
-                else if (NumberOfBytes >= 0 && !metaData)
+                else if (NumberOfBytes >= FILEBYTELIMIT && !metaData)
                 {
-                    lock (lockThis)
+                    lock (lockBinaryWriter)
                     {
-                        BinaryWriter Writer = new BinaryWriter(File.OpenWrite(folderName + "\\" + receivingFileName));
+                        BinaryWriter Writer;
+                        try
+                        {
+                            Writer = new BinaryWriter(File.OpenWrite(folderName + "\\" + receivingFileName));
+                        }
+                        catch {
+                            String[] tempList = Directory.GetFiles(folderName);
+                            receivingFileName = "corruptedDownload.txt";
+                            int counter = 1;
+                            foreach (String x in tempList)
+                            {
+                                if (x.Contains(receivingFileName))
+                                {
+                                    receivingFileName = "corruptedDownload(" + counter + ").txt";
+                                }
+
+                            }
+                            Writer = new BinaryWriter(File.OpenWrite(folderName + "\\" + receivingFileName));
+                        }
                         byte[] fileContentsdecrypt = new byte[FILEBYTELIMIT];
                         for (int i = 0; i < FILEBYTELIMIT; i++)
                         {
                             fileContentsdecrypt[i] = fileContents[i];
                         }
+                        
                         Writer.Write(fileContents);
                         Writer.Flush();
                         Writer.Close();
@@ -196,11 +220,11 @@ namespace FileTransferClient.Models
                 }
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Debug.Assert(false, ex.Message);
             }
-           
+
         }
         public void PingAddress()
         {
