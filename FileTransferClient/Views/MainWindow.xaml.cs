@@ -31,7 +31,7 @@ namespace FileTransferClient
         //Contains list of connected IPAddresses
         List<String> connectedIPAddress;
         //Contains list of all files in the specified directory
-        String[] fileList;
+        List<String> fileList;
 
         public MainWindow()
         {
@@ -120,12 +120,11 @@ namespace FileTransferClient
         private void GetFileNames()
         {
             String[] tempList = Directory.GetFiles(peerConnection.GetSyncFolderName());
-            fileList = new String[tempList.Length];
+            fileList = new List<String>();
             int currentfile = 0;
             foreach (String file in tempList)
             {
                 String fileName = file.Substring(file.LastIndexOf('\\') + 1);
-                Console.WriteLine(fileName);
                 fileList[currentfile] = fileName;
                 currentfile++;
             }

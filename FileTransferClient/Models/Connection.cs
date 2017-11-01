@@ -15,9 +15,10 @@ namespace FileTransferClient.Models
 
         private const int PORT = 4450;
         private const int FILEBYTELIMIT = 2000000;
-        private const int FILENAMEBYTELIMIT = 500;
+        private const int FILENAMEBYTELIMIT = 400;
         private const int FILEDATEBYTELIMIT = 100;
         private bool metaData { get; set; }
+        private List<String> fileReceivedList;
         private String folderName;
         private String receivingFileName;
         //This Computer
@@ -111,11 +112,11 @@ namespace FileTransferClient.Models
             sendingFile = true;
 
         }
-        public void SendFileMetaData(String[] file)
+        public void SendFileMetaData(List<String> file)
         {
             byte[] metaData = new byte[FILEBYTELIMIT];
             int counter = 0;
-            for (int i = 0; i < file.Length; )
+            for (int i = 0; i < file.Count; )
             {
                 String fileDirectory = folderName + "\\" + file[i];
                 foreach (byte x in Encoding.ASCII.GetBytes(file[i]))
@@ -169,44 +170,41 @@ namespace FileTransferClient.Models
                 fileContents = (byte[])obj[0];
                 Handler = (Socket)obj[1];
                 int NumberOfBytes = fileContents.Length;
-                //if (sendingFile)
-                //{
-                //}
                 if (NumberOfBytes >= FILENAMEBYTELIMIT && metaData)
                 {
                     lock (lockMetaData)
                     {
-                        int spaces = 0;
-                        int stringSize = 0;
-                        for (int i = 0; i < FILENAMEBYTELIMIT; i++)
+                        fileReceivedList = new List<string>();
+                        bool isLastString = false;
+                        int counter = 0;
+                        int index = 0;
+                        while (!isLastString)
                         {
-                            if (fileContents[i] == 0)
+                            int spaces = 0;
+                            byte[] fileNameBytes = new byte[FILENAMEBYTELIMIT];
+                            for (int i = 0; i < FILENAMEBYTELIMIT; i++)
                             {
-                                spaces++;
+                                fileNameBytes[i] = fileContents[counter+i];
+                                if (fileContents[counter + 1]==0)
+                                {
+                                    spaces++;
+                                }
+                                if (spaces == FILENAMEBYTELIMIT)
+                                {
+                                    isLastString = true;
+                                }
+
                             }
-                            if (spaces == 1) { break; }
-                            stringSize++;
+                            if (!isLastString)
+                            {
+                                String found = Encoding.ASCII.GetString(fileNameBytes).Trim();
+                                fileReceivedList.Add(found);
+                                Debug.Assert(false, found);
+                            }
+                            index++;
+                            counter += (index * FILENAMEBYTELIMIT) + FILEDATEBYTELIMIT;
                         }
-                        byte[] fileNameBytes = new byte[stringSize];
-                        for (int i = 0; i < stringSize; i++)
-                        {
-                            fileNameBytes[i] = fileContents[i];
-                        }
-                        receivingFileName = (Encoding.ASCII.GetString(fileNameBytes)).Trim();
-                        Debug.Assert(false, receivingFileName);
-                        //if (!receivingFileName.Equals(""))
-                        //{
                         metaData = false;
-                            //byte[] goodCommandReceived = { 0 };
-                            //senderSocket.Send(goodCommandReceived);
-                            //Debug.Assert(false, "GOOD LINE");
-                        //}
-                        //else
-                        //{
-                        //    byte[] badCommandReceived = { 1 };
-                        //    senderSocket.Send(badCommandReceived);
-                        //    Debug.Assert(false, "BAD LINE");
-                        //}
                     }
                 }
 
