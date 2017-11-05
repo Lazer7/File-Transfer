@@ -54,6 +54,7 @@ namespace FileTransferClient
             connectedIPAddress.Add(ipAddress);
             ConnectedIPAddressListBox.ItemsSource = connectedIPAddress;
             LabelChecking.Content = peerConnection.ConnectToPeer(ipAddress);
+            LabelChecking.Content = peerConnection.ConnectToPeer(ipAddress);
         }
 
         private void SendButton_Click(object sender, RoutedEventArgs e)
@@ -67,10 +68,10 @@ namespace FileTransferClient
                 peerConnection.SendFileMetaData(fileList[i]);
                 while (Reply) ;
                 MessageBox.Show("Metadata Sent");
-                foreach (String ip in connectedIPAddress)
-                {
-                    peerConnection.ConnectToPeer(ip);
-                }
+                //foreach (String ip in connectedIPAddress)
+                //{
+                //    peerConnection.ConnectToPeer(ip);
+                //}
                 if (!peerConnection.GoodReceive)
                 {
                     i--;
@@ -80,10 +81,10 @@ namespace FileTransferClient
                 peerConnection.SendFile(fileList[i]);
                 while (Reply) ;
                 MessageBox.Show("file Sent");
-                foreach (String ip in connectedIPAddress)
-                {
-                    peerConnection.ConnectToPeer(ip);
-                }
+                //foreach (String ip in connectedIPAddress)
+                //{
+                //    peerConnection.ConnectToPeer(ip);
+                //}
                 if (!peerConnection.GoodReceive)
                 {
                     i--;
@@ -161,6 +162,7 @@ namespace FileTransferClient
             String[] tempList = Directory.GetFiles(peerConnection.GetSyncFolderName());
             fileList = new String[tempList.Length];
             int currentfile = 0;
+            MessageBox.Show(tempList.Length.ToString());
             foreach (String file in tempList)
             {
                 String fileName = file.Substring(file.LastIndexOf('\\') + 1);
