@@ -169,7 +169,7 @@ namespace FileTransferClient.Models
                     sendFileSendingNotification(EventArgs.Empty);
                     if (fileContents[0] == 1) { GoodReceive = true; }
                     else { GoodReceive = false; }
-                    Debug.Assert(false, "Response Received" + GoodReceive.ToString());
+                    Debug.Assert(false, "Response Received " + GoodReceive.ToString());
                     sendingfile = false;
                 }
                 else if (NumberOfBytes >= FILENAMEBYTELIMIT && metaData)
@@ -196,15 +196,17 @@ namespace FileTransferClient.Models
                         if (!receivingFileName.Equals("")&&receivingFileName.Contains("."))
                         {
                             metaData = false;
-                            sendFileSendingNotification(EventArgs.Empty);
+                            
                             byte[] reply = { 1 };
                             senderSocket.Send(reply);
+                            sendFileSendingNotification(EventArgs.Empty);
                         }
                         else
                         {
-                            sendFileSendingNotification(EventArgs.Empty);
+                           
                             byte[] reply = { 0 };
                             senderSocket.Send(reply);
+                            sendFileSendingNotification(EventArgs.Empty);
                         }
 
                     }
@@ -245,9 +247,10 @@ namespace FileTransferClient.Models
                         Writer.Dispose();
                         receivingFileName = "";
                         metaData = true;
-                        sendFileSendingNotification(EventArgs.Empty);
+                       
                         byte[] reply = { 1 };
                         senderSocket.Send(reply);
+                        sendFileSendingNotification(EventArgs.Empty);
 
                     }
                 }

@@ -1,6 +1,7 @@
 ﻿using FileTransferClient.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -54,7 +55,6 @@ namespace FileTransferClient
             connectedIPAddress.Add(ipAddress);
             ConnectedIPAddressListBox.ItemsSource = connectedIPAddress;
             LabelChecking.Content = peerConnection.ConnectToPeer(ipAddress);
-            LabelChecking.Content = peerConnection.ConnectToPeer(ipAddress);
         }
 
         private void SendButton_Click(object sender, RoutedEventArgs e)
@@ -67,28 +67,28 @@ namespace FileTransferClient
 
                 peerConnection.SendFileMetaData(fileList[i]);
                 while (Reply) ;
-                MessageBox.Show("Metadata Sent");
-                //foreach (String ip in connectedIPAddress)
-                //{
-                //    peerConnection.ConnectToPeer(ip);
-                //}
                 if (!peerConnection.GoodReceive)
                 {
+                    Debug.Assert(false,"Metadata was Incorrectly Sent");
                     i--;
                     continue;
+                }
+                else
+                {
+                    Debug.Assert(false, "MetaData sent correctly");
                 }
                 Reply = true;
                 peerConnection.SendFile(fileList[i]);
                 while (Reply) ;
-                MessageBox.Show("file Sent");
-                //foreach (String ip in connectedIPAddress)
-                //{
-                //    peerConnection.ConnectToPeer(ip);
-                //}
                 if (!peerConnection.GoodReceive)
                 {
+                    Debug.Assert(false, "file was Incorrectly Sent");
                     i--;
                     continue;
+                }
+                else
+                {
+                    Debug.Assert(false, "file sent correctly");
                 }
             }
             peerConnection.FileSendingNotification -= fileReply;
