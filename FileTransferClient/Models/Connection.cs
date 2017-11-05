@@ -198,7 +198,6 @@ namespace FileTransferClient.Models
                             sendFileSendingNotification(EventArgs.Empty);
                             byte[] reply = { 1 };
                             senderSocket.Send(reply);
-                            Debug.Assert(false,receivingFileName);
                         }
                         else
                         {
@@ -242,6 +241,7 @@ namespace FileTransferClient.Models
                         Writer.Write(fileContents);
                         Writer.Flush();
                         Writer.Close();
+                        Writer.Dispose();
                         receivingFileName = "";
                         metaData = true;
                         sendFileSendingNotification(EventArgs.Empty);
