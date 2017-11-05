@@ -67,27 +67,27 @@ namespace FileTransferClient
                 peerConnection.SendFileMetaData(fileList[i]);
                 while (Reply) ;
                 MessageBox.Show("Metadata Sent");
+                foreach (String ip in connectedIPAddress)
+                {
+                    peerConnection.ConnectToPeer(ip);
+                }
                 if (!peerConnection.GoodReceive)
                 {
                     i--;
                     continue;
-                }
-                foreach (String ip in connectedIPAddress)
-                {
-                    peerConnection.ConnectToPeer(ip);
                 }
                 Reply = true;
                 peerConnection.SendFile(fileList[i]);
                 while (Reply) ;
                 MessageBox.Show("file Sent");
+                foreach (String ip in connectedIPAddress)
+                {
+                    peerConnection.ConnectToPeer(ip);
+                }
                 if (!peerConnection.GoodReceive)
                 {
                     i--;
                     continue;
-                }
-                foreach (String ip in connectedIPAddress)
-                {
-                    peerConnection.ConnectToPeer(ip);
                 }
             }
             peerConnection.FileSendingNotification -= fileReply;
