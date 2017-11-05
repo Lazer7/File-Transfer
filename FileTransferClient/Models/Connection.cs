@@ -244,6 +244,10 @@ namespace FileTransferClient.Models
                         Writer.Close();
                         receivingFileName = "";
                         metaData = true;
+                        sendFileSendingNotification(EventArgs.Empty);
+                        byte[] reply = { 1 };
+                        senderSocket.Send(reply);
+                        Debug.Assert(false, receivingFileName);
                     }
                 }
 
