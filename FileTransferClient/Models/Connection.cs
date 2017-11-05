@@ -270,10 +270,10 @@ namespace FileTransferClient.Models
                         processInfo.FileName = Environment.SystemDirectory + "\\PING.EXE";
                         processInfo.Arguments = ipAddressHost + i + " -n 1";
                         processInfo.UseShellExecute = false;
-                        processInfo.CreateNoWindow = true;
+                        processInfo.CreateNoWindow = false;
                         Process process = new Process();
                         process.StartInfo = processInfo;
-                        process.StartInfo.CreateNoWindow = true;
+                        process.StartInfo.CreateNoWindow = false;
                         process.Start();
                     }
                     sendFileSendingNotification(EventArgs.Empty);

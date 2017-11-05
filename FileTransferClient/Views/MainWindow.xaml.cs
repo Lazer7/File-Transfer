@@ -59,6 +59,7 @@ namespace FileTransferClient
         private void SendButton_Click(object sender, RoutedEventArgs e)
         {
             peerConnection.FileSendingNotification += fileReply;
+            SendButton.IsEnabled = false;
             for (int i = 0; i < fileList.Length; i++)
             {
                 Reply = true;
@@ -75,7 +76,7 @@ namespace FileTransferClient
                 {
                     peerConnection.ConnectToPeer(ip);
                 }
-
+                Reply = true;
                 peerConnection.SendFile(fileList[i]);
                 while (Reply) ;
                 MessageBox.Show("file Sent");
@@ -90,6 +91,7 @@ namespace FileTransferClient
                 }
             }
             peerConnection.FileSendingNotification -= fileReply;
+            SendButton.IsEnabled = true;
         }
         void fileReply(object sender, EventArgs e)
         {
