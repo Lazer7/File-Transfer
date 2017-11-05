@@ -169,7 +169,7 @@ namespace FileTransferClient.Models
                     sendFileSendingNotification(EventArgs.Empty);
                     if (fileContents[0] == 1) { GoodReceive = true; }
                     else { GoodReceive = false; }
-                    Debug.Assert(false, "Response Received " + GoodReceive.ToString());
+
                     sendingfile = false;
                 }
                 else if (NumberOfBytes >= FILENAMEBYTELIMIT && metaData)

@@ -69,26 +69,16 @@ namespace FileTransferClient
                 while (Reply) ;
                 if (!peerConnection.GoodReceive)
                 {
-                    Debug.Assert(false,"Metadata was Incorrectly Sent");
                     i--;
                     continue;
-                }
-                else
-                {
-                    Debug.Assert(false, "MetaData sent correctly");
                 }
                 Reply = true;
                 peerConnection.SendFile(fileList[i]);
                 while (Reply) ;
                 if (!peerConnection.GoodReceive)
                 {
-                    Debug.Assert(false, "file was Incorrectly Sent");
                     i--;
                     continue;
-                }
-                else
-                {
-                    Debug.Assert(false, "file sent correctly");
                 }
             }
             peerConnection.FileSendingNotification -= fileReply;
