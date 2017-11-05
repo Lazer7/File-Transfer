@@ -247,7 +247,7 @@ namespace FileTransferClient.Models
                         sendFileSendingNotification(EventArgs.Empty);
                         byte[] reply = { 1 };
                         senderSocket.Send(reply);
-                        Debug.Assert(false, receivingFileName);
+
                     }
                 }
 
