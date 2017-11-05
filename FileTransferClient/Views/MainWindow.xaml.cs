@@ -1,24 +1,10 @@
 ﻿using FileTransferClient.Models;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace FileTransferClient
 {
@@ -33,7 +19,10 @@ namespace FileTransferClient
         List<String> connectedIPAddress;
         //Contains list of all files in the specified directory
         String[] fileList;
-        bool Reply;
+        //(geply) check if file was sent correctly
+        //(getNames) halts the refresh of the directory get list of files  
+        bool reply,getNames;
+        ////////////////////Window Form Functions ////////////////
         public MainWindow()
         {
             InitializeComponent();
@@ -47,72 +36,66 @@ namespace FileTransferClient
             //Brings Window into focus
             BringIntoView();
             Focus();
+            //End's the Thread to refresh the sync folder directory
+            this.Closed += CloseActiveThreads;
         }
-
         private void Connect_Click(object sender, RoutedEventArgs e)
         {
             String ipAddress = AvailableIPAddressListBox.SelectedItem.ToString();
+            //Creates a socket for the selected ip 
             connectedIPAddress.Add(ipAddress);
             ConnectedIPAddressListBox.ItemsSource = connectedIPAddress;
             LabelChecking.Content = peerConnection.ConnectToPeer(ipAddress);
         }
-
         private void SendButton_Click(object sender, RoutedEventArgs e)
         {
+            //this event allows the program to continue to send data after receiving a message that the other client has recieved the previous data
             peerConnection.FileSendingNotification += fileReply;
             SendButton.IsEnabled = false;
+            //End the sync folder refresh thread
+            getNames = false;
             for (int i = 0; i < fileList.Length; i++)
             {
-                Reply = true;
-
+                reply = true;
                 peerConnection.SendFileMetaData(fileList[i]);
-                while (Reply) ;
+                //Wait for Reply from other client
+                while (reply) ;
+                //Check if the data sent was received correctly
                 if (!peerConnection.GoodReceive)
                 {
+                    //roll back and resend the file again
                     i--;
                     continue;
                 }
-                Reply = true;
+                reply = true;
                 peerConnection.SendFile(fileList[i]);
-                while (Reply) ;
+                //Wait for Reply from other client
+                while (reply) ;
                 if (!peerConnection.GoodReceive)
                 {
+                    //roll back and resend the file again
                     i--;
                     continue;
                 }
             }
+            //Remove event of receving file Responses
             peerConnection.FileSendingNotification -= fileReply;
             SendButton.IsEnabled = true;
+            //Restart sync folder refresh directory
+            GetFileNames();
         }
-        void fileReply(object sender, EventArgs e)
+        private void Refresh_Click(object sender, RoutedEventArgs e)
         {
-            Reply = false;
+            peerConnection.PingAddress();
+            peerConnection.FileSendingNotification += EventReached;
         }
         private void DisconnectButton_Click(object sender, RoutedEventArgs e)
         {
             String ipAddress = (String)ConnectedIPAddressListBox.SelectedItem;
             connectedIPAddress.Remove(ipAddress);
         }
-
-        private void Refresh_Click(object sender, RoutedEventArgs e)
-        {
-            peerConnection.PingAddress();
-            peerConnection.FileSendingNotification += EventReached;
-        }
-
-        void EventReached(object sender, EventArgs e)
-        {
-            this.Dispatcher.Invoke(() =>
-            {
-
-                AvailableIPAddressListBox.ItemsSource = peerConnection.GetIpAddress();
-
-            });
-            peerConnection.FileSendingNotification -= EventReached;
-        }
         private void Folder_Click(object sender, RoutedEventArgs e)
         {
-
             ///////////////////////GET FOLDER FOR SYNCING//////////////////
             using (var open = new System.Windows.Forms.FolderBrowserDialog())
             {
@@ -132,13 +115,55 @@ namespace FileTransferClient
             IPAddress[] iPAddress = Dns.GetHostAddresses(hostName);
             LabelChecking.Content = "Your IP Address is" + iPAddress[1].ToString();
             //////////////////////////////////////////////////////////////
-            //Sets 
             AvailableIPAddressListBox.ItemsSource = peerConnection.GetIpAddress();
             GetFileNames();
             DisconnectButton.IsEnabled = true;
             ConnectingB.IsEnabled = true;
             RefreshButton.IsEnabled = true;
             SendButton.IsEnabled = true;
+        }
+        ////////////////////Data Retrieval Functions//////////////////////////////////////
+        private void GetFileNames()
+        {
+            getNames = true;
+            new Thread(() =>
+            {
+                while (getNames)
+                {
+                    String[] tempList = Directory.GetFiles(peerConnection.GetSyncFolderName());
+                    fileList = new String[tempList.Length];
+                    int currentfile = 0;
+                    foreach (String file in tempList)
+                    {
+                        String fileName = file.Substring(file.LastIndexOf('\\') + 1);
+                        Console.WriteLine(fileName);
+                        fileList[currentfile] = fileName;
+                        currentfile++;
+                    }
+                    this.Dispatcher.Invoke(() =>
+                    {
+                        FileListBox.ItemsSource = fileList;
+                    });
+                    Thread.Sleep(2000);
+                }
+            }).Start();
+        }
+        ///////////////////////// EVENT FUNCTIONS//////////////////////////////////////
+        private void EventReached(object sender, EventArgs e)
+        {
+            this.Dispatcher.Invoke(() =>
+            {
+                AvailableIPAddressListBox.ItemsSource = peerConnection.GetIpAddress();
+            });
+            peerConnection.FileSendingNotification -= EventReached;
+        }
+        private void CloseActiveThreads(object sender, EventArgs e)
+        {
+            getNames = false;
+        }
+        private void fileReply(object sender, EventArgs e)
+        {
+            reply = false;
         }
         private void Reconnect(object sender, EventArgs e)
         {
@@ -147,21 +172,6 @@ namespace FileTransferClient
                 peerConnection.ConnectToPeer(ip);
             }
         }
-        private void GetFileNames()
-        {
-            String[] tempList = Directory.GetFiles(peerConnection.GetSyncFolderName());
-            fileList = new String[tempList.Length];
-            int currentfile = 0;
-            MessageBox.Show(tempList.Length.ToString());
-            foreach (String file in tempList)
-            {
-                String fileName = file.Substring(file.LastIndexOf('\\') + 1);
-                Console.WriteLine(fileName);
-                fileList[currentfile] = fileName;
-                currentfile++;
-            }
-
-        }
-
+        ////////////////////////////////////////////////////////////////////////////////
     }
 }

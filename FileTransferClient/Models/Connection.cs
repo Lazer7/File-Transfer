@@ -296,11 +296,5 @@ namespace FileTransferClient.Models
                 handler(this, e);
             }
         }
-       
-
     }
-
-
-
-
 }

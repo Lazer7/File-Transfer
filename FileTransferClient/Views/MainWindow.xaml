@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FileTransferClient"
         mc:Ignorable="d"
-        Title="MainWindow" Height="384.2" Width="525">
+        Title="MainWindow" Height="384.2" Width="780.2">
     <Grid>
         <Button Name="ConnectingB" Content="Connect" Click="Connect_Click" HorizontalAlignment="Left" Margin="71,293,0,0" VerticalAlignment="Top" Width="75"/>
         <Label Name="LabelChecking" Content="Checking" HorizontalAlignment="Left" Margin="114,57,0,0" VerticalAlignment="Top"/>
@@ -17,6 +17,9 @@
         <Button Name="DisconnectButton" Content="Disconnect" Click="DisconnectButton_Click" HorizontalAlignment="Left" Margin="323,293,0,0" VerticalAlignment="Top" Width="75"/>
         <Button Name="RefreshButton" Content="Refresh" Click="Refresh_Click" HorizontalAlignment="Left" Margin="25,63,0,0" VerticalAlignment="Top" Width="51"/>
         <Button Content="Search for Folder" Click="Folder_Click" HorizontalAlignment="Left" Margin="25,26,0,0" VerticalAlignment="Top" Width="105"/>
+        <ListBox Name="FileListBox" HorizontalAlignment="Left" Height="162" Margin="504,113,0,0" VerticalAlignment="Top" Width="157"/>
+        <Label Content="Files" HorizontalAlignment="Left" Margin="504,87,0,0" VerticalAlignment="Top"/>
+        <Viewbox HorizontalAlignment="Left" Height="100" Margin="586,311,0,-56.6" VerticalAlignment="Top" Width="100"/>
 
     </Grid>
 </Window>
