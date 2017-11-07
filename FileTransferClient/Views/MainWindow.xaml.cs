@@ -60,6 +60,7 @@ namespace FileTransferClient
                 reply = true;
                 peerConnection.SendSubdirectories(subdirectories);
                 while (reply) ;
+                MessageBox.Show("SubDirectories sent");
                 if (!peerConnection.GoodReceive)
                 {
                     //roll back and resend the file again
@@ -160,9 +161,10 @@ namespace FileTransferClient
                             String fileName = directory+"\\"+ file.Substring(file.LastIndexOf('\\') + 1);
                             fileList.Add(fileName);
                         }
-                        this.Dispatcher.Invoke(() =>
+                        this.Dispatcher.InvokeAsync(() =>
                         {
                             FileListBox.ItemsSource = fileList;
+                            FileListBox.Items.Refresh();
                         });
                     }
                     Thread.Sleep(2000);

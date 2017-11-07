@@ -11,7 +11,7 @@ namespace FileTransferClient.Models
 {
     public class Connection
     {
-        public string currentIP{ get; set; }
+        public string currentIP { get; set; }
 
         private const int PORT = 4450;
         private const int FILEBYTELIMIT = 2000000;
@@ -160,8 +160,6 @@ namespace FileTransferClient.Models
             sendingfile = true;
 
         }
-
-
         public void CallBack(IAsyncResult ar)
         {
             try
@@ -180,9 +178,9 @@ namespace FileTransferClient.Models
             catch (Exception ex)
             {
                 Debug.Assert(false, ex.ToString());
-                
+
             }
-            
+
         }
         public void ReceiveFile(IAsyncResult ar)
         {
@@ -203,22 +201,34 @@ namespace FileTransferClient.Models
                     else { GoodReceive = false; }
                     sendingfile = false;
                 }
-                else if (NumberOfBytes >= FILENAMEBYTELIMIT && receivingSubdirectories)
+                else if (NumberOfBytes >= FILEBYTELIMIT && receivingSubdirectories)
                 {
                     List<String> receivedDirectories = new List<string>();
-                    int index=1;
-
-                    for (int i = 0; i < FILEBYTELIMIT; i++) {
-                        byte[] currentName = new byte[500];
-                        for (int j = 0; j < 500; i++)
+                    int index = 1;
+                    for (int i = 0; i < FILEBYTELIMIT - 500; i++)
+                    {
+                        int spaces = 0;
+                        for (int f = i; f < i + 500; f++)
                         {
-                            if (fileContents[j + i] != 0)
+                            if (fileContents[f] != 0)
+                            {
+                                spaces++;
+                            }
+                            else { break; }
+                        }
+                        byte[] currentName = new byte[spaces];
+                        for (int j = 0; j < spaces; j++)
+                        {
+                            if (fileContents[i + j] != 0)
                             {
                                 currentName[j] = fileContents[j + i];
                             }
+                            else { break; }
                         }
                         string parseDirectory = (Encoding.ASCII.GetString(currentName)).Trim();
-                        if(parseDirectory.Equals("")) {
+
+                        if (parseDirectory.Equals(""))
+                        {
                             break;
                         }
                         receivedDirectories.Add(parseDirectory);
@@ -228,20 +238,23 @@ namespace FileTransferClient.Models
                     foreach (String directory in receivedDirectories)
                     {
 
-                        if (!System.IO.Directory.Exists(directory))
+                        String refinedDirectory = directory;
+                        if (!refinedDirectory[0].Equals("\\"))
                         {
-                            System.IO.Directory.CreateDirectory(directory);
+                            refinedDirectory = "\\" + directory;
+                        }
+                        if (!System.IO.Directory.Exists(folderName + refinedDirectory))
+                        {
+                            Debug.Assert(false, folderName + refinedDirectory);
+                            System.IO.Directory.CreateDirectory(folderName + refinedDirectory);
                         }
                     }
-
-                        receivingSubdirectories = false;
-                        byte[] reply = { 1 };
-                        senderSocket.Send(reply);
-                        sendFileSendingNotification(EventArgs.Empty);
-                    
-
-
+                    receivingSubdirectories = false;
+                    byte[] reply = { 1 };
+                    senderSocket.Send(reply);
+                    sendFileSendingNotification(EventArgs.Empty);
                 }
+
                 else if (NumberOfBytes >= FILENAMEBYTELIMIT && metaData)
                 {
                     lock (lockMetaData)
@@ -326,35 +339,35 @@ namespace FileTransferClient.Models
                 }
 
 
-        }
+            }
             catch (Exception ex)
             {
                 Debug.Assert(false, ex.Message);
             }
 
-}
+        }
 
         public void PingAddress()
         {
             new Thread(() =>
             {
-                    string hostName = Dns.GetHostName();
-                    IPAddress[] iPAddress = Dns.GetHostAddresses(hostName);
-                    String ipAddressHost = iPAddress[1].ToString();
-                    ipAddressHost = ipAddressHost.Substring(0, ipAddressHost.LastIndexOf('.') + 1);
-                    for (int i = 1; i < 255; i++)
-                    {
-                        ProcessStartInfo processInfo = new ProcessStartInfo();
-                        processInfo.FileName = Environment.SystemDirectory + "\\PING.EXE";
-                        processInfo.Arguments = ipAddressHost + i + " -n 1";
-                        processInfo.UseShellExecute = false;
-                        processInfo.CreateNoWindow = true;
-                        Process process = new Process();
-                        process.StartInfo = processInfo;
-                        process.StartInfo.CreateNoWindow = true;
-                        process.Start();
-                    }
-                    sendFileSendingNotification(EventArgs.Empty);
+                string hostName = Dns.GetHostName();
+                IPAddress[] iPAddress = Dns.GetHostAddresses(hostName);
+                String ipAddressHost = iPAddress[1].ToString();
+                ipAddressHost = ipAddressHost.Substring(0, ipAddressHost.LastIndexOf('.') + 1);
+                for (int i = 1; i < 255; i++)
+                {
+                    ProcessStartInfo processInfo = new ProcessStartInfo();
+                    processInfo.FileName = Environment.SystemDirectory + "\\PING.EXE";
+                    processInfo.Arguments = ipAddressHost + i + " -n 1";
+                    processInfo.UseShellExecute = false;
+                    processInfo.CreateNoWindow = true;
+                    Process process = new Process();
+                    process.StartInfo = processInfo;
+                    process.StartInfo.CreateNoWindow = true;
+                    process.Start();
+                }
+                sendFileSendingNotification(EventArgs.Empty);
             }).Start();
 
         }

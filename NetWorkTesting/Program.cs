@@ -153,29 +153,30 @@ namespace NetWorkTesting
             //threadRunning = true;
             //while (threadRunning) ;
             ///////////////////////////////////////////////////////////////////////
-            string[] subdirectoryEntriess = Directory.GetDirectories("C:\\Users\\Jimmy\\Desktop\\Client1");
-
-            List<String> sub = subdirectoryEntries("C:\\Users\\Jimmy\\Desktop\\Client1");
-            String[] empty;
-            String[] hey = { "a", "b", "c", "d", "e" };
-            String[] wey = { "no" };
-            String[] last = { "last" };
+            //string[] subdirectoryEntriess = Directory.GetDirectories("C:\\Users\\Jimmy\\Desktop\\Client1");
 
 
-            foreach (String directory in sub)
-            {
-                Console.WriteLine(directory);
-            }
 
 
-            if (!System.IO.Directory.Exists(@"C:\\Users\\Jimmy\\Desktop\\Client1\\KMS"))
-            {
-                System.IO.Directory.CreateDirectory(@"C:\\Users\\Jimmy\\Desktop\\Client1\\KMS");
-            }
+            //foreach (String directory in subdirectoryEntries("C:\\Users\\Jimmy\\Desktop\\Client1"))
+            //{
+            //    Console.WriteLine(directory);
+            //}
+
+
+            //if (!System.IO.Directory.Exists(@"C:\\Users\\Jimmy\\Desktop\\Client1\\KMS"))
+            //{
+            //    System.IO.Directory.CreateDirectory(@"C:\\Users\\Jimmy\\Desktop\\Client1\\KMS");
+            //}
 
             /////////////////////////////////////////////////////////////////////////////
-            
 
+            String x = "hella\\hard";
+            if (!x.StartsWith("\\"))
+            {
+                x = "\\" + x;
+                Console.WriteLine(x);
+            }
 
             //var fileList = new List<KeyValuePair<String, String>>();
             //fileList.Add(new KeyValuePair<String, String>("1", "file1"));
