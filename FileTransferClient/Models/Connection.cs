@@ -30,6 +30,7 @@ namespace FileTransferClient.Models
         private static System.Object lockBinaryWriter = new System.Object();
         private static System.Object lockMetaData = new System.Object();
         private bool sendingfile;
+        private bool receivingSubdirectories;
         public bool GoodReceive { get; set; }
 
 
@@ -38,6 +39,7 @@ namespace FileTransferClient.Models
             this.folderName = folderName;
             sendingfile = false;
             metaData = true;
+            receivingSubdirectories = true;
         }
         public String GetSyncFolderName() { return folderName; }
         public string CreatePeerConnection()
@@ -103,7 +105,6 @@ namespace FileTransferClient.Models
         {
             String fileDirectory = folderName + "\\" + file;
             byte[] metaData = File.ReadAllBytes(fileDirectory);
-
             try
             {
                 senderSocket.Send(metaData);
@@ -135,6 +136,32 @@ namespace FileTransferClient.Models
             catch (Exception ex) { }
             sendingfile = true;
         }
+        public void SendSubdirectories(List<String> subDirectories)
+        {
+            byte[] metaData = new byte[FILEBYTELIMIT];
+            int counter = 0;
+            int currentspot = 1;
+            int DIRECTORYBYTESIZE = 500;
+            foreach (String directory in subDirectories)
+            {
+                foreach (byte x in Encoding.ASCII.GetBytes(directory))
+                {
+                    metaData[counter] = x;
+                    counter++;
+                }
+                counter = currentspot * DIRECTORYBYTESIZE;
+                currentspot++;
+            }
+            try
+            {
+                senderSocket.Send(metaData);
+            }
+            catch (Exception ex) { }
+            sendingfile = true;
+
+        }
+
+
         public void CallBack(IAsyncResult ar)
         {
             try
@@ -150,7 +177,12 @@ namespace FileTransferClient.Models
                 AsyncCallback aCallback = new AsyncCallback(CallBack);
                 currentListener.BeginAccept(aCallback, currentListener);
             }
-            catch (Exception ex) { Debug.Assert(false, ex.ToString()); }
+            catch (Exception ex)
+            {
+                Debug.Assert(false, ex.ToString());
+                
+            }
+            
         }
         public void ReceiveFile(IAsyncResult ar)
         {
@@ -169,8 +201,46 @@ namespace FileTransferClient.Models
                     sendFileSendingNotification(EventArgs.Empty);
                     if (fileContents[0] == 1) { GoodReceive = true; }
                     else { GoodReceive = false; }
-
                     sendingfile = false;
+                }
+                else if (NumberOfBytes >= FILENAMEBYTELIMIT && receivingSubdirectories)
+                {
+                    List<String> receivedDirectories = new List<string>();
+                    int index=1;
+
+                    for (int i = 0; i < FILEBYTELIMIT; i++) {
+                        byte[] currentName = new byte[500];
+                        for (int j = 0; j < 500; i++)
+                        {
+                            if (fileContents[j + i] != 0)
+                            {
+                                currentName[j] = fileContents[j + i];
+                            }
+                        }
+                        string parseDirectory = (Encoding.ASCII.GetString(currentName)).Trim();
+                        if(parseDirectory.Equals("")) {
+                            break;
+                        }
+                        receivedDirectories.Add(parseDirectory);
+                        i = index * 500;
+                        index++;
+                    }
+                    foreach (String directory in receivedDirectories)
+                    {
+
+                        if (!System.IO.Directory.Exists(directory))
+                        {
+                            System.IO.Directory.CreateDirectory(directory);
+                        }
+                    }
+
+                        receivingSubdirectories = false;
+                        byte[] reply = { 1 };
+                        senderSocket.Send(reply);
+                        sendFileSendingNotification(EventArgs.Empty);
+                    
+
+
                 }
                 else if (NumberOfBytes >= FILENAMEBYTELIMIT && metaData)
                 {
@@ -193,17 +263,17 @@ namespace FileTransferClient.Models
                             fileNameBytes[i] = fileContents[i];
                         }
                         receivingFileName = (Encoding.ASCII.GetString(fileNameBytes)).Trim();
-                        if (!receivingFileName.Equals("")&&receivingFileName.Contains("."))
+                        if (!receivingFileName.Equals("") && receivingFileName.Contains("."))
                         {
                             metaData = false;
-                            
+
                             byte[] reply = { 1 };
                             senderSocket.Send(reply);
                             sendFileSendingNotification(EventArgs.Empty);
                         }
                         else
                         {
-                           
+
                             byte[] reply = { 0 };
                             senderSocket.Send(reply);
                             sendFileSendingNotification(EventArgs.Empty);
@@ -247,7 +317,7 @@ namespace FileTransferClient.Models
                         Writer.Dispose();
                         receivingFileName = "";
                         metaData = true;
-                       
+
                         byte[] reply = { 1 };
                         senderSocket.Send(reply);
                         sendFileSendingNotification(EventArgs.Empty);

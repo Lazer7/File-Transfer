@@ -147,13 +147,84 @@ namespace NetWorkTesting
             ////////////////////////////////////////////////////////////////////////////////
 
             ///////////////////////////////////Threading ////////////////////////////////
-            DummyClass dummyClass = new DummyClass();
-            dummyClass.ThreshholdReached += EventReached;
-            dummyClass.startThread();
-            threadRunning = true;
-            while (threadRunning) ;
+            //DummyClass dummyClass = new DummyClass();
+            //dummyClass.ThreshholdReached += EventReached;
+            //dummyClass.startThread();
+            //threadRunning = true;
+            //while (threadRunning) ;
             ///////////////////////////////////////////////////////////////////////
+            string[] subdirectoryEntriess = Directory.GetDirectories("C:\\Users\\Jimmy\\Desktop\\Client1");
+
+            List<String> sub = subdirectoryEntries("C:\\Users\\Jimmy\\Desktop\\Client1");
+            String[] empty;
+            String[] hey = { "a", "b", "c", "d", "e" };
+            String[] wey = { "no" };
+            String[] last = { "last" };
+
+
+            foreach (String directory in sub)
+            {
+                Console.WriteLine(directory);
+            }
+
+
+            if (!System.IO.Directory.Exists(@"C:\\Users\\Jimmy\\Desktop\\Client1\\KMS"))
+            {
+                System.IO.Directory.CreateDirectory(@"C:\\Users\\Jimmy\\Desktop\\Client1\\KMS");
+            }
+
+            /////////////////////////////////////////////////////////////////////////////
+            
+
+
+            //var fileList = new List<KeyValuePair<String, String>>();
+            //fileList.Add(new KeyValuePair<String, String>("1", "file1"));
+            //fileList.Add(new KeyValuePair<String, String>("1", "file2"));
+            //fileList.Add(new KeyValuePair<String, String>("2", "file1"));
+            //fileList.Add(new KeyValuePair<String, String>("1", "file3"));
+            //fileList.Add(new KeyValuePair<String, String>("1", "file4"));
+
+            //var lookUp = fileList.ToLookup(KV => KV.Key, KV => KV.Value);
+
+
+            //foreach (string x in lookUp["1"])
+            //{
+            //    Console.WriteLine(x);
+            //}
+
+
         }
+
+        static List<String> subdirectoryEntries(string homeDirectory,string previousDirectory="")
+        {
+            string[] subdirectory = Directory.GetDirectories(homeDirectory);
+            List<String> internalsubdirectory = new List<string>(); ;
+            foreach (String x in subdirectory)
+            {
+                String currentDirectory= x.Substring(x.LastIndexOf('\\'));
+                if (previousDirectory.Equals(""))
+                {
+                    internalsubdirectory.Add(currentDirectory);
+                }
+                else
+                {
+                    internalsubdirectory.Add(previousDirectory + x.Substring(x.LastIndexOf('\\')));
+                }
+                if (Directory.GetDirectories(x) != null)
+                {
+                    List<String>temp = subdirectoryEntries(x, previousDirectory+currentDirectory);
+                    foreach (String y in temp)
+                    {
+                  
+                       internalsubdirectory.Add(y);
+                    }
+                }
+
+            }
+
+            return internalsubdirectory;
+        }
+
         static void EventReached(object sender, EventArgs e)
         {
             threadRunning = false;

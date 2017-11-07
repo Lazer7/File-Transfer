@@ -18,7 +18,8 @@ namespace FileTransferClient
         //Contains list of connected IPAddresses
         List<String> connectedIPAddress;
         //Contains list of all files in the specified directory
-        String[] fileList;
+        List<String> fileList;
+        List<String> subdirectories;
         //(geply) check if file was sent correctly
         //(getNames) halts the refresh of the directory get list of files  
         bool reply,getNames;
@@ -54,7 +55,19 @@ namespace FileTransferClient
             SendButton.IsEnabled = false;
             //End the sync folder refresh thread
             getNames = false;
-            for (int i = 0; i < fileList.Length; i++)
+            for (int i = 0; i < subdirectories.Count; i++)
+            {
+                reply = true;
+                peerConnection.SendSubdirectories(subdirectories);
+                while (reply) ;
+                if (!peerConnection.GoodReceive)
+                {
+                    //roll back and resend the file again
+                    i--;
+                    continue;
+                }
+            }
+            for (int i = 0; i < fileList.Count; i++)
             {
                 reply = true;
                 peerConnection.SendFileMetaData(fileList[i]);
@@ -128,25 +141,62 @@ namespace FileTransferClient
             getNames = true;
             new Thread(() =>
             {
+                
                 while (getNames)
                 {
+                    subdirectories = subdirectoryEntries(peerConnection.GetSyncFolderName());
+                    fileList = new List<string>();
                     String[] tempList = Directory.GetFiles(peerConnection.GetSyncFolderName());
-                    fileList = new String[tempList.Length];
-                    int currentfile = 0;
                     foreach (String file in tempList)
                     {
                         String fileName = file.Substring(file.LastIndexOf('\\') + 1);
-                        Console.WriteLine(fileName);
-                        fileList[currentfile] = fileName;
-                        currentfile++;
+                        fileList.Add(fileName);
                     }
-                    this.Dispatcher.Invoke(() =>
+                    foreach (string directory in subdirectories)
                     {
-                        FileListBox.ItemsSource = fileList;
-                    });
+                        tempList = Directory.GetFiles(peerConnection.GetSyncFolderName()+directory);
+                        foreach (String file in tempList)
+                        {
+                            String fileName = directory+"\\"+ file.Substring(file.LastIndexOf('\\') + 1);
+                            fileList.Add(fileName);
+                        }
+                        this.Dispatcher.Invoke(() =>
+                        {
+                            FileListBox.ItemsSource = fileList;
+                        });
+                    }
                     Thread.Sleep(2000);
                 }
             }).Start();
+        }
+        List<String> subdirectoryEntries(string homeDirectory, string previousDirectory = "")
+        {
+            string[] subdirectory = Directory.GetDirectories(homeDirectory);
+            List<String> internalsubdirectory = new List<string>(); ;
+            foreach (String x in subdirectory)
+            {
+                String currentDirectory = x.Substring(x.LastIndexOf('\\'));
+                if (previousDirectory.Equals(""))
+                {
+                    internalsubdirectory.Add(currentDirectory);
+                }
+                else
+                {
+                    internalsubdirectory.Add(previousDirectory + x.Substring(x.LastIndexOf('\\')));
+                }
+                if (Directory.GetDirectories(x) != null)
+                {
+                    List<String> temp = subdirectoryEntries(x, previousDirectory + currentDirectory);
+                    foreach (String y in temp)
+                    {
+
+                        internalsubdirectory.Add(y);
+                    }
+                }
+
+            }
+
+            return internalsubdirectory;
         }
         ///////////////////////// EVENT FUNCTIONS//////////////////////////////////////
         private void EventReached(object sender, EventArgs e)
