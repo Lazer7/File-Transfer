@@ -55,19 +55,12 @@ namespace FileTransferClient
             SendButton.IsEnabled = false;
             //End the sync folder refresh thread
             getNames = false;
-            for (int i = 0; i < subdirectories.Count; i++)
-            {
-                reply = true;
-                peerConnection.SendSubdirectories(subdirectories);
-                while (reply) ;
-                MessageBox.Show("SubDirectories sent");
-                if (!peerConnection.GoodReceive)
-                {
-                    //roll back and resend the file again
-                    i--;
-                    continue;
-                }
-            }
+
+            reply = true;
+            peerConnection.SendSubdirectories(subdirectories);
+            while (reply) ;
+            MessageBox.Show("SubDirectories sent");
+
             for (int i = 0; i < fileList.Count; i++)
             {
                 reply = true;
