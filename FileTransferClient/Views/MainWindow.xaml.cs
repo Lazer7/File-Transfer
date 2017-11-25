@@ -47,7 +47,7 @@ namespace FileTransferClient
             //Creates a socket for the selected ip 
             connectedIPAddress.Add(ipAddress);
             ConnectedIPAddressListBox.ItemsSource = connectedIPAddress;
-            LabelChecking.Content = peerConnection.ConnectToPeer(ipAddress);
+            peerConnection.ConnectToPeer(ipAddress);
         }
         private void SendButton_Click(object sender, RoutedEventArgs e)
         {
@@ -59,12 +59,11 @@ namespace FileTransferClient
             currentSocket = 0;
             foreach (String address in connectedIPAddress)
             {
+                peerConnection.SendConnectorSocket();
                 ///////////////////////////////////////////////START OF SINGLE PEER CONNECTION///////////////////////////
                 reply = true;
                 peerConnection.SendSubdirectories(subdirectories);
                 while (reply) ;
-                MessageBox.Show("SubDirectories sent");
-
                 for (int i = 0; i < fileList.Count; i++)
                 {
                     reply = true;
@@ -89,6 +88,7 @@ namespace FileTransferClient
                         continue;
                     }
                 }
+                peerConnection.SendConnectorSocket();
                 currentSocket++;
             }
             //Remove event of receving file Responses

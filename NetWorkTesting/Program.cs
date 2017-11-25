@@ -20,6 +20,25 @@ namespace NetWorkTesting
         static void Main(string[] args)
         {
 
+
+            Socket currentSocket;
+            Socket current2;
+            SocketPermission permission = new SocketPermission(NetworkAccess.Connect, TransportType.Tcp, "", SocketPermission.AllPorts);
+            permission.Demand();
+            IPAddress ipAddress = IPAddress.Parse("192.168.7");
+            IPEndPoint ipEndpoint = new IPEndPoint(ipAddress, 4450);
+            currentSocket = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            current2= new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+
+            Console.WriteLine(currentSocket.AddressFamily.Equals(current2.AddressFamily));
+
+
+
+
+
+
+
+
             //String fileDirectory = "C:\\Users\\Jimmy\\Desktop\\Client1\\ahri.jpg";
             //byte[] fileContents = File.ReadAllBytes(fileDirectory);
             //    for (int i = 0; i < fileContents.Length; i++) {
