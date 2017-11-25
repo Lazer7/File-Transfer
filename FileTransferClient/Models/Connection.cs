@@ -201,7 +201,7 @@ namespace FileTransferClient.Models
             }
             try
             {
-                senderSocket[MainWindow.currentSocket].Send(metaData);
+                MetaSenderSocket[MainWindow.currentSocket].Send(metaData);
             }
             catch (Exception ex) { }
             sendingfile = true;
