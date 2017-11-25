@@ -23,6 +23,7 @@ namespace FileTransferClient
         //(geply) check if file was sent correctly
         //(getNames) halts the refresh of the directory get list of files  
         bool reply,getNames;
+        public static int currentSocket;
         ////////////////////Window Form Functions ////////////////
         public MainWindow()
         {
@@ -55,35 +56,40 @@ namespace FileTransferClient
             SendButton.IsEnabled = false;
             //End the sync folder refresh thread
             getNames = false;
-
-            reply = true;
-            peerConnection.SendSubdirectories(subdirectories);
-            while (reply) ;
-            MessageBox.Show("SubDirectories sent");
-
-            for (int i = 0; i < fileList.Count; i++)
+            currentSocket = 0;
+            foreach (String address in connectedIPAddress)
             {
+                ///////////////////////////////////////////////START OF SINGLE PEER CONNECTION///////////////////////////
                 reply = true;
-                peerConnection.SendFileMetaData(fileList[i]);
-                //Wait for Reply from other client
+                peerConnection.SendSubdirectories(subdirectories);
                 while (reply) ;
-                //Check if the data sent was received correctly
-                if (!peerConnection.GoodReceive)
+                MessageBox.Show("SubDirectories sent");
+
+                for (int i = 0; i < fileList.Count; i++)
                 {
-                    //roll back and resend the file again
-                    i--;
-                    continue;
+                    reply = true;
+                    peerConnection.SendFileMetaData(fileList[i]);
+                    //Wait for Reply from other client
+                    while (reply) ;
+                    //Check if the data sent was received correctly
+                    if (!peerConnection.GoodReceive)
+                    {
+                        //roll back and resend the file again
+                        i--;
+                        continue;
+                    }
+                    reply = true;
+                    peerConnection.SendFile(fileList[i]);
+                    //Wait for Reply from other client
+                    while (reply) ;
+                    if (!peerConnection.GoodReceive)
+                    {
+                        //roll back and resend the file again
+                        i--;
+                        continue;
+                    }
                 }
-                reply = true;
-                peerConnection.SendFile(fileList[i]);
-                //Wait for Reply from other client
-                while (reply) ;
-                if (!peerConnection.GoodReceive)
-                {
-                    //roll back and resend the file again
-                    i--;
-                    continue;
-                }
+                currentSocket++;
             }
             //Remove event of receving file Responses
             peerConnection.FileSendingNotification -= fileReply;

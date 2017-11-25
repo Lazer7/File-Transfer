@@ -6,6 +6,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using FileTransferClient;
+using System.Windows;
 
 namespace FileTransferClient.Models
 {
@@ -26,7 +28,7 @@ namespace FileTransferClient.Models
         private Socket Handler;
         public event EventHandler FileSendingNotification;
         //Connecting to Other Computer
-        private Socket senderSocket;
+        private List<Socket> senderSocket;
         private static System.Object lockBinaryWriter = new System.Object();
         private static System.Object lockMetaData = new System.Object();
         private bool sendingfile;
@@ -67,12 +69,14 @@ namespace FileTransferClient.Models
         {
             try
             {
+                Socket currentSocket;
                 SocketPermission permission = new SocketPermission(NetworkAccess.Connect, TransportType.Tcp, "", SocketPermission.AllPorts);
                 permission.Demand();
                 IPAddress ipAddress = IPAddress.Parse(Address);
                 IPEndPoint ipEndpoint = new IPEndPoint(ipAddress, PORT);
-                senderSocket = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                senderSocket.Connect(ipEndpoint);
+                currentSocket = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                currentSocket.Connect(ipEndpoint);
+                senderSocket.Add(currentSocket);
             }
             catch (Exception ex) { return ex.ToString(); }
             return "Success";
@@ -131,7 +135,7 @@ namespace FileTransferClient.Models
             }
             try
             {
-                senderSocket.Send(metaData);
+                senderSocket[MainWindow.currentSocket].Send(metaData);
             }
             catch (Exception ex) { }
             sendingfile = true;
