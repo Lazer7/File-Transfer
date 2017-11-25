@@ -245,7 +245,6 @@ namespace FileTransferClient.Models
                         }
                         if (!System.IO.Directory.Exists(folderName + refinedDirectory))
                         {
-                            Debug.Assert(false, folderName + refinedDirectory);
                             System.IO.Directory.CreateDirectory(folderName + refinedDirectory);
                         }
                     }
