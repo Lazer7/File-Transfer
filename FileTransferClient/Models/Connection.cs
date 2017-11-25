@@ -185,7 +185,7 @@ namespace FileTransferClient.Models
         }
         public void SendSubdirectories(List<String> subDirectories)
         {
-            byte[] metaData = new byte[FILENAMEBYTELIMIT];
+            byte[] metaData = new byte[FILEBYTELIMIT];
             int counter = 0;
             int currentspot = 1;
             int DIRECTORYBYTESIZE = 500;
@@ -306,6 +306,7 @@ namespace FileTransferClient.Models
                 }
                 else if (NumberOfBytes >= FILEBYTELIMIT && receivingSubdirectories)
                 {
+                    Debug.Assert(false, "Doust is here");
                     List<String> receivedDirectories = new List<string>();
                     int index = 1;
                     for (int i = 0; i < FILEBYTELIMIT - 500; i++)
@@ -329,7 +330,6 @@ namespace FileTransferClient.Models
                             else { break; }
                         }
                         string parseDirectory = (Encoding.ASCII.GetString(currentName)).Trim();
-
                         if (parseDirectory.Equals(""))
                         {
                             break;
@@ -445,6 +445,7 @@ namespace FileTransferClient.Models
             catch (Exception ex)
             {
                 Debug.Assert(false, ex.Message);
+                Debug.Assert(false, "THE INDEXSENDINGIPADDRESS IS" + indexSendingIPAddress);
             }
 
         }
