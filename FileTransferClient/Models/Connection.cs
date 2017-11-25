@@ -106,17 +106,19 @@ namespace FileTransferClient.Models
                     }
                     index++;
                 }
-                currentSocket.Connect(ipEndpoint);
-                currentSocket.Connect(ipEndpointmeta);
                 if (sameSocket != -1)
                 {
+                    currentSocket.Connect(ipEndpoint);
                     senderSocket[sameSocket] = (currentSocket);
+                    currentSocket.Connect(ipEndpointmeta);
                     MetaSenderSocket[sameSocket] = (currentSocket);
                     addressNames[sameSocket] = Address;
                 }
                 else
                 {
+                    currentSocket.Connect(ipEndpoint);
                     senderSocket.Add(currentSocket);
+                    currentSocket.Connect(ipEndpointmeta);
                     MetaSenderSocket.Add(currentSocket);
                     addressNames.Add(Address);
                 }
