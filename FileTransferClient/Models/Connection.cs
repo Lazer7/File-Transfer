@@ -201,7 +201,7 @@ namespace FileTransferClient.Models
             }
             try
             {
-                MetaSenderSocket[MainWindow.currentSocket].Send(metaData);
+                senderSocket[MainWindow.currentSocket].Send(metaData);
             }
             catch (Exception ex) { }
             sendingfile = true;
@@ -217,7 +217,7 @@ namespace FileTransferClient.Models
             byte[] metaData = Encoding.ASCII.GetBytes(ipAddress);
             try
             {
-                senderSocket[MainWindow.currentSocket].Send(metaData);
+                MetaSenderSocket[MainWindow.currentSocket].Send(metaData);
             }
             catch (Exception ex) { }
         }
