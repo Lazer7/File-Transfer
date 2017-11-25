@@ -213,6 +213,7 @@ namespace FileTransferClient.Models
             IPAddress[] hostAddress = Dns.GetHostAddresses(hostName);
 
             String ipAddress = hostAddress[1].ToString();
+            Debug.Assert(false, "SENDING MY IP:"+ ipAddress);
             byte[] metaData = Encoding.ASCII.GetBytes(ipAddress);
             try
             {
@@ -275,12 +276,14 @@ namespace FileTransferClient.Models
                 if (receivingSubdirectories)
                 {
                     string parseDirectory = (Encoding.ASCII.GetString(fileContents)).Trim();
+                    Debug.Assert(false, "RECEIVING END: "+parseDirectory+"|||||||||");
                     indexSendingIPAddress = addressNames.IndexOf(parseDirectory);
                 }
                 else
                 {
                     receivingSubdirectories = true;
                 }
+                sendFileSendingNotification(EventArgs.Empty);
             }
             catch { }
         }
