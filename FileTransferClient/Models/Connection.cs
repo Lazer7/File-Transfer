@@ -39,7 +39,7 @@ namespace FileTransferClient.Models
         private static System.Object lockMetaData = new System.Object();
         private bool sendingfile;
         private int indexSendingIPAddress;
-
+        private int currentSocket;
 
         private bool receivingSubdirectories;
         public bool GoodReceive { get; set; }
@@ -156,7 +156,7 @@ namespace FileTransferClient.Models
             byte[] metaData = File.ReadAllBytes(fileDirectory);
             try
             {
-                senderSocket[MainWindow.currentSocket].Send(metaData);
+                senderSocket[currentSocket].Send(metaData);
             }
             catch (Exception ex) { }
             sendingfile = true;
@@ -180,7 +180,7 @@ namespace FileTransferClient.Models
             }
             try
             {
-                senderSocket[MainWindow.currentSocket].Send(metaData);
+                senderSocket[currentSocket].Send(metaData);
             }
             catch (Exception ex) { }
             sendingfile = true;
@@ -203,14 +203,15 @@ namespace FileTransferClient.Models
             }
             try
             {
-                senderSocket[MainWindow.currentSocket].Send(metaData);
+                senderSocket[currentSocket].Send(metaData);
             }
             catch (Exception ex) { }
             sendingfile = true;
 
         }
-        public void SendConnectorSocket()
+        public void SendConnectorSocket(int currentSocket)
         {
+            this.currentSocket = currentSocket;
             string hostName = Dns.GetHostName();
             IPAddress[] hostAddress = Dns.GetHostAddresses(hostName);
 
@@ -219,7 +220,7 @@ namespace FileTransferClient.Models
             byte[] metaData = Encoding.ASCII.GetBytes(ipAddress);
             try
             {
-                MetaSenderSocket[MainWindow.currentSocket].Send(metaData);
+                MetaSenderSocket[currentSocket].Send(metaData);
             }
             catch (Exception ex) { }
         }

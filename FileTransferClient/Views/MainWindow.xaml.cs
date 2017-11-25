@@ -23,7 +23,7 @@ namespace FileTransferClient
         //(geply) check if file was sent correctly
         //(getNames) halts the refresh of the directory get list of files  
         bool reply,getNames;
-        public static int currentSocket;
+        private int currentSocket;
         ////////////////////Window Form Functions ////////////////
         public MainWindow()
         {
@@ -59,7 +59,7 @@ namespace FileTransferClient
             currentSocket = 0;
             foreach (String address in connectedIPAddress)
             {
-                peerConnection.SendConnectorSocket();
+                peerConnection.SendConnectorSocket(currentSocket);
                 ///////////////////////////////////////////////START OF SINGLE PEER CONNECTION///////////////////////////
                 reply = true;
                 peerConnection.SendSubdirectories(subdirectories);
@@ -88,7 +88,7 @@ namespace FileTransferClient
                         continue;
                     }
                 }
-                peerConnection.SendConnectorSocket();
+                peerConnection.SendConnectorSocket(currentSocket);
                 currentSocket++;
             }
             //Remove event of receving file Responses
