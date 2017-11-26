@@ -124,6 +124,7 @@ namespace FileTransferClient.Models
         }
         public void SendFile(String file)
         {
+            sendingfile = true;
             String fileDirectory = folderName + "\\" + file;
             byte[] metaData = File.ReadAllBytes(fileDirectory);
             try
@@ -131,11 +132,11 @@ namespace FileTransferClient.Models
                 senderSocket.Send(metaData);
             }
             catch (Exception ex) { }
-            sendingfile = true;
 
         }
         public void SendFileMetaData(String file)
         {
+            sendingfile = true;
             byte[] metaData = new byte[FILEDATEBYTELIMIT + FILENAMEBYTELIMIT];
             String fileDirectory = folderName + "\\" + file;
             int counter = 0;
@@ -155,10 +156,10 @@ namespace FileTransferClient.Models
                 senderSocket.Send(metaData);
             }
             catch (Exception ex) { }
-            sendingfile = true;
         }
         public void SendSubdirectories(List<String> subDirectories)
         {
+            sendingfile = true;
             byte[] metaData = new byte[FILEBYTELIMIT];
             int counter = 0;
             int currentspot = 1;
@@ -178,11 +179,10 @@ namespace FileTransferClient.Models
                 senderSocket.Send(metaData);
             }
             catch (Exception ex) { }
-            sendingfile = true;
-
         }
         public void SendStartEnd()
         {
+            sendingfile = true;
             string hostName = Dns.GetHostName();
             IPAddress[] hostAddress = Dns.GetHostAddresses(hostName);
             byte[] metaData = hostAddress[1].GetAddressBytes();
@@ -191,7 +191,6 @@ namespace FileTransferClient.Models
                 MetaSenderSocket.Send(metaData);
             }
             catch (Exception ex) { }
-            sendingfile= true;
         }
 
 
