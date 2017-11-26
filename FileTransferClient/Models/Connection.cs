@@ -65,13 +65,15 @@ namespace FileTransferClient.Models
                 Listener.Listen(10);
                 AsyncCallback callBack = new AsyncCallback(CallBack);
                 Listener.BeginAccept(callBack, Listener);
-
-                MetaEndPoint = new IPEndPoint(hostAddress[1], METAPORT);
-                MetaListener = new Socket(hostAddress[1].AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                MetaListener.Bind(MetaEndPoint);
-                MetaListener.Listen(5);
-                AsyncCallback metaCallBack = new AsyncCallback(MetaCallBack);
-                MetaListener.BeginAccept(metaCallBack, MetaListener);
+                if (!sendingfile)
+                {
+                    MetaEndPoint = new IPEndPoint(hostAddress[1], METAPORT);
+                    MetaListener = new Socket(hostAddress[1].AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                    MetaListener.Bind(MetaEndPoint);
+                    MetaListener.Listen(5);
+                    AsyncCallback metaCallBack = new AsyncCallback(MetaCallBack);
+                    MetaListener.BeginAccept(metaCallBack, MetaListener);
+                }
             }
             catch (Exception ex)
             {
@@ -230,16 +232,15 @@ namespace FileTransferClient.Models
                     currentSocket = receivedAddressed.ToString();
                     Debug.Assert(false, "IPAddress parse" + currentSocket);
                     Debug.Assert(false, "||" + currentSocket + "||");
-                    sendFileSendingNotification(EventArgs.Empty);
                     byte[] reply = { 1 };
                     senderSocket.Send(reply);
+                    sendFileSendingNotification(EventArgs.Empty);
                 }
                 else
                 {
                     receivingSubdirectories = true;
                     currentSocket = null;
                 }
-                sendFileSendingNotification(EventArgs.Empty);
             }
             catch (Exception ex) { Debug.Assert(false, "META SENT ERROR" + ex.Message); }
          }
