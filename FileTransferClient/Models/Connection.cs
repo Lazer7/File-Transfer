@@ -14,7 +14,6 @@ namespace FileTransferClient.Models
         public string currentIP { get; set; }
 
         private const int PORT = 4450;
-        private const int METAPORT = 4451;
         private const int FILEBYTELIMIT = 2000000;
         private const int FILENAMEBYTELIMIT = 400;
         private const int FILEDATEBYTELIMIT = 100;
@@ -25,20 +24,13 @@ namespace FileTransferClient.Models
         private Socket Listener;
         private IPEndPoint endpoint;
         private Socket Handler;
-        //This Computer Meta Listener
-        private Socket MetaListener;
-        private IPEndPoint MetaEndPoint;
-        private Socket MetaHandler;
         public event EventHandler FileSendingNotification;
         //Connecting to Other Computer
         private Socket senderSocket;
-        private Socket MetaSenderSocket;
         private static System.Object lockBinaryWriter = new System.Object();
         private static System.Object lockMetaData = new System.Object();
         private bool sendingfile;
-        private bool MetaSending;
         private bool receivingSubdirectories;
-        public string currentSocket { get; set; }
         public bool GoodReceive { get; set; }
 
 
@@ -58,21 +50,12 @@ namespace FileTransferClient.Models
                 permission.Demand();
                 string hostName = Dns.GetHostName();
                 IPAddress[] hostAddress = Dns.GetHostAddresses(hostName);
-
                 endpoint = new IPEndPoint(hostAddress[1], PORT);
                 Listener = new Socket(hostAddress[1].AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                 Listener.Bind(endpoint);
                 Listener.Listen(10);
                 AsyncCallback callBack = new AsyncCallback(CallBack);
                 Listener.BeginAccept(callBack, Listener);
-
-                    MetaEndPoint = new IPEndPoint(hostAddress[1], METAPORT);
-                    MetaListener = new Socket(hostAddress[1].AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                    MetaListener.Bind(MetaEndPoint);
-                    MetaListener.Listen(5);
-                    AsyncCallback metaCallBack = new AsyncCallback(MetaCallBack);
-                    MetaListener.BeginAccept(metaCallBack, MetaListener);
-                
             }
             catch (Exception ex)
             {
@@ -90,9 +73,6 @@ namespace FileTransferClient.Models
                 IPEndPoint ipEndpoint = new IPEndPoint(ipAddress, PORT);
                 senderSocket = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                 senderSocket.Connect(ipEndpoint);
-                IPEndPoint MetaIPEndpoint = new IPEndPoint(ipAddress, METAPORT);
-                MetaSenderSocket = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                MetaSenderSocket.Connect(MetaIPEndpoint);
             }
             catch (Exception ex) { return ex.ToString(); }
             return "Success";
@@ -123,7 +103,6 @@ namespace FileTransferClient.Models
         }
         public void SendFile(String file)
         {
-            sendingfile = true;
             String fileDirectory = folderName + "\\" + file;
             byte[] metaData = File.ReadAllBytes(fileDirectory);
             try
@@ -131,11 +110,11 @@ namespace FileTransferClient.Models
                 senderSocket.Send(metaData);
             }
             catch (Exception ex) { }
+            sendingfile = true;
 
         }
         public void SendFileMetaData(String file)
         {
-            sendingfile = true;
             byte[] metaData = new byte[FILEDATEBYTELIMIT + FILENAMEBYTELIMIT];
             String fileDirectory = folderName + "\\" + file;
             int counter = 0;
@@ -155,10 +134,10 @@ namespace FileTransferClient.Models
                 senderSocket.Send(metaData);
             }
             catch (Exception ex) { }
+            sendingfile = true;
         }
         public void SendSubdirectories(List<String> subDirectories)
         {
-            sendingfile = true;
             byte[] metaData = new byte[FILEBYTELIMIT];
             int counter = 0;
             int currentspot = 1;
@@ -178,80 +157,9 @@ namespace FileTransferClient.Models
                 senderSocket.Send(metaData);
             }
             catch (Exception ex) { }
-        }
-        public void SendStartEnd()
-        {
             sendingfile = true;
-            string hostName = Dns.GetHostName();
-            IPAddress[] hostAddress = Dns.GetHostAddresses(hostName);
-            byte[] metaData = hostAddress[1].GetAddressBytes();
-            try
-            {
-                MetaSenderSocket.Send(metaData);
-            }
-            catch (Exception ex) { }
+
         }
-
-
-
-        public void MetaCallBack(IAsyncResult ar)
-        {
-            try
-            {
-                byte[] buffer = new byte[4];
-                Socket currentListener = (Socket)ar.AsyncState;
-                Socket currentHandler = currentListener.EndAccept(ar);
-                currentHandler.NoDelay = false;
-                object[] obj = new object[2];
-                obj[0] = buffer;
-                obj[1] = currentHandler;
-                currentHandler.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, new AsyncCallback(MetaReceiveData), obj);
-                AsyncCallback aCallback = new AsyncCallback(MetaCallBack);
-                currentListener.BeginAccept(aCallback, currentListener);
-            }
-            catch (Exception ex)
-            {
-                Debug.Assert(false, ex.ToString());
-
-            }
-        }
-        public void MetaReceiveData(IAsyncResult ar)
-        {
-            //GetEnvironmentString
-            byte[] fileContents = null;
-            try
-            {
-                object[] obj = (object[])ar.AsyncState;
-                fileContents = (byte[])obj[0];
-                Handler = (Socket)obj[1];
-                if (receivingSubdirectories)
-                {
-                    IPAddress receivedAddressed = new IPAddress(fileContents);
-                    if (!receivedAddressed.ToString().Equals("0.0.0.0"))
-                    {
-                        currentSocket = receivedAddressed.ToString();
-                        Debug.Assert(false, "IPAddress parse" + currentSocket);
-                        Debug.Assert(false, "||" + currentSocket + "||");
-                        byte[] reply = { 1 };
-                        senderSocket.Send(reply);
-                        sendFileSendingNotification(EventArgs.Empty);
-                    }
-                }
-                else
-                {
-                    Debug.Assert(false, "Shouldn't be here");
-                    receivingSubdirectories = true;
-                    currentSocket = null;
-                    sendingfile = false;
-                }
-            }
-            catch (Exception ex) { Debug.Assert(false, "META SENT ERROR" + ex.Message); }
-         }
-
-
-
-
-
         public void CallBack(IAsyncResult ar)
         {
             try
@@ -280,18 +188,18 @@ namespace FileTransferClient.Models
             byte[] fileContents = null;
             try
             {
-                
+
                 object[] obj = (object[])ar.AsyncState;
                 fileContents = (byte[])obj[0];
                 Handler = (Socket)obj[1];
                 int NumberOfBytes = fileContents.Length;
-                
+
                 if (sendingfile)
                 {
                     sendFileSendingNotification(EventArgs.Empty);
                     if (fileContents[0] == 1) { GoodReceive = true; }
                     else { GoodReceive = false; }
-
+                    sendingfile = false;
                 }
                 else if (NumberOfBytes >= FILEBYTELIMIT && receivingSubdirectories)
                 {
@@ -337,11 +245,11 @@ namespace FileTransferClient.Models
                         }
                         if (!System.IO.Directory.Exists(folderName + refinedDirectory))
                         {
+                            Debug.Assert(false, folderName + refinedDirectory);
                             System.IO.Directory.CreateDirectory(folderName + refinedDirectory);
                         }
                     }
                     receivingSubdirectories = false;
-                    ConnectToPeer(this.currentSocket);
                     byte[] reply = { 1 };
                     senderSocket.Send(reply);
                     sendFileSendingNotification(EventArgs.Empty);
@@ -370,15 +278,15 @@ namespace FileTransferClient.Models
                         receivingFileName = (Encoding.ASCII.GetString(fileNameBytes)).Trim();
                         if (!receivingFileName.Equals("") && receivingFileName.Contains("."))
                         {
-                            ConnectToPeer(this.currentSocket);
                             metaData = false;
+
                             byte[] reply = { 1 };
                             senderSocket.Send(reply);
                             sendFileSendingNotification(EventArgs.Empty);
                         }
                         else
                         {
-                            ConnectToPeer(this.currentSocket);
+
                             byte[] reply = { 0 };
                             senderSocket.Send(reply);
                             sendFileSendingNotification(EventArgs.Empty);
@@ -421,8 +329,8 @@ namespace FileTransferClient.Models
                         Writer.Close();
                         Writer.Dispose();
                         receivingFileName = "";
-                        ConnectToPeer(this.currentSocket);
                         metaData = true;
+
                         byte[] reply = { 1 };
                         senderSocket.Send(reply);
                         sendFileSendingNotification(EventArgs.Empty);
@@ -435,21 +343,9 @@ namespace FileTransferClient.Models
             catch (Exception ex)
             {
                 Debug.Assert(false, ex.Message);
-                Debug.Assert(false, ex.Source.ToString());
-                Debug.Assert(false, ex.ToString());
-                sendFileSendingNotification(EventArgs.Empty);
-                if (fileContents[0] == 1) { GoodReceive = true; }
-                else { GoodReceive = false; }
-                sendingfile = false;
             }
 
         }
-
-
-
-
-
-
 
         public void PingAddress()
         {
