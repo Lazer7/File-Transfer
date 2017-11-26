@@ -230,7 +230,6 @@ namespace FileTransferClient.Models
                 Handler = (Socket)obj[1];
                 if (MetaSending)
                 {
-                    sendFileSendingNotification(EventArgs.Empty);
                     if (fileContents[0] == 1) { GoodReceive = true; }
                     else { GoodReceive = false; }
                     MetaSending = false;
