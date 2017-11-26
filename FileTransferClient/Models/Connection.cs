@@ -183,7 +183,7 @@ namespace FileTransferClient.Models
         {
             string hostName = Dns.GetHostName();
             IPAddress[] hostAddress = Dns.GetHostAddresses(hostName);
-            byte[] metaData = Encoding.ASCII.GetBytes(hostName[1].ToString());
+            byte[] metaData = hostAddress[1].GetAddressBytes();
             try
             {
                 MetaSenderSocket.Send(metaData);
@@ -233,7 +233,8 @@ namespace FileTransferClient.Models
                 }
                 else if (receivingSubdirectories)
                 {
-                    currentSocket = (Encoding.ASCII.GetString(fileContents)).Trim();
+                    IPAddress receivedAddressed = new IPAddress(fileContents);
+                    currentSocket = receivedAddressed.ToString();
                     Debug.Assert(false, "||" + currentSocket + "||");
                     sendFileSendingNotification(EventArgs.Empty);
                     byte[] reply = { 1 };
