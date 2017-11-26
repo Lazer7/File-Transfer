@@ -240,6 +240,7 @@ namespace FileTransferClient
             }
             else if(peerConnection.currentSocket!=null)
             {
+                MessageBox.Show(peerConnection.currentSocket);
                 peerConnection.ConnectToPeer(peerConnection.currentSocket);
             }
         }
