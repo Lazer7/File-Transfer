@@ -229,12 +229,15 @@ namespace FileTransferClient.Models
                 if (receivingSubdirectories)
                 {
                     IPAddress receivedAddressed = new IPAddress(fileContents);
-                    currentSocket = receivedAddressed.ToString();
-                    Debug.Assert(false, "IPAddress parse" + currentSocket);
-                    Debug.Assert(false, "||" + currentSocket + "||");
-                    byte[] reply = { 1 };
-                    senderSocket.Send(reply);
-                    sendFileSendingNotification(EventArgs.Empty);
+                    if (!receivedAddressed.ToString().Equals("0.0.0.0"))
+                    {
+                        currentSocket = receivedAddressed.ToString();
+                        Debug.Assert(false, "IPAddress parse" + currentSocket);
+                        Debug.Assert(false, "||" + currentSocket + "||");
+                        byte[] reply = { 1 };
+                        senderSocket.Send(reply);
+                        sendFileSendingNotification(EventArgs.Empty);
+                    }
                 }
                 else
                 {
