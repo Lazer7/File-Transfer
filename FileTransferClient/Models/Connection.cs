@@ -372,7 +372,6 @@ namespace FileTransferClient.Models
                             byte[] reply = { 1 };
                             senderSocket.Send(reply);
                             sendFileSendingNotification(EventArgs.Empty);
-                            Debug.Assert(false, "I GOT THE METAFILE");
                         }
                         else
                         {
@@ -380,7 +379,6 @@ namespace FileTransferClient.Models
                             byte[] reply = { 0 };
                             senderSocket.Send(reply);
                             sendFileSendingNotification(EventArgs.Empty);
-                            Debug.Assert(false, "I DIdn't GOT THE METAFILE");
                         }
 
                     }
@@ -421,7 +419,6 @@ namespace FileTransferClient.Models
                         Writer.Dispose();
                         receivingFileName = "";
                         metaData = true;
-                        Debug.Assert(false, "I GOT THE FILE");
                         byte[] reply = { 1 };
                         senderSocket.Send(reply);
                         sendFileSendingNotification(EventArgs.Empty);
