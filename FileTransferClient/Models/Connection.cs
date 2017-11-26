@@ -65,15 +65,14 @@ namespace FileTransferClient.Models
                 Listener.Listen(10);
                 AsyncCallback callBack = new AsyncCallback(CallBack);
                 Listener.BeginAccept(callBack, Listener);
-                if (!sendingfile)
-                {
+
                     MetaEndPoint = new IPEndPoint(hostAddress[1], METAPORT);
                     MetaListener = new Socket(hostAddress[1].AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                     MetaListener.Bind(MetaEndPoint);
                     MetaListener.Listen(5);
                     AsyncCallback metaCallBack = new AsyncCallback(MetaCallBack);
                     MetaListener.BeginAccept(metaCallBack, MetaListener);
-                }
+                
             }
             catch (Exception ex)
             {
@@ -431,9 +430,12 @@ namespace FileTransferClient.Models
             catch (Exception ex)
             {
                 Debug.Assert(false, ex.Message);
-                byte[] reply = { 0 };
-                senderSocket.Send(reply);
+                Debug.Assert(false, ex.Source.ToString());
+                Debug.Assert(false, ex.ToString());
                 sendFileSendingNotification(EventArgs.Empty);
+                if (fileContents[0] == 1) { GoodReceive = true; }
+                else { GoodReceive = false; }
+                sendingfile = false;
             }
 
         }
