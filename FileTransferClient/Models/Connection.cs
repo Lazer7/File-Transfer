@@ -36,6 +36,7 @@ namespace FileTransferClient.Models
         private static System.Object lockBinaryWriter = new System.Object();
         private static System.Object lockMetaData = new System.Object();
         private bool sendingfile;
+        private bool MetaSending;
         private bool receivingSubdirectories;
         public string currentSocket { get; set; }
         public bool GoodReceive { get; set; }
@@ -188,8 +189,7 @@ namespace FileTransferClient.Models
                 MetaSenderSocket.Send(metaData);
             }
             catch (Exception ex) { }
-            sendingfile = true;
-
+            MetaSending= true;
         }
 
 
@@ -224,11 +224,20 @@ namespace FileTransferClient.Models
                 object[] obj = (object[])ar.AsyncState;
                 fileContents = (byte[])obj[0];
                 Handler = (Socket)obj[1];
-                int NumberOfBytes = fileContents.Length;
-                if (receivingSubdirectories)
+                if (MetaSending)
+                {
+                    sendFileSendingNotification(EventArgs.Empty);
+                    if (fileContents[0] == 1) { GoodReceive = true; }
+                    else { GoodReceive = false; }
+                    MetaSending = false;
+                }
+                else if (receivingSubdirectories)
                 {
                     currentSocket = (Encoding.ASCII.GetString(fileContents)).Trim();
                     Debug.Assert(false, "||" + currentSocket + "||");
+                    sendFileSendingNotification(EventArgs.Empty);
+                    byte[] reply = { 1 };
+                    MetaSenderSocket.Send(reply);
                 }
                 else
                 {

@@ -57,12 +57,21 @@ namespace FileTransferClient
             SendButton.IsEnabled = false;
             //End the sync folder refresh thread
             getNames = false;
-            foreach (String ipAddress in connectedIPAddress)
+            for(int index = 0; index < connectedIPAddress.Count; index++)
             {
-                currentIpAddress = ipAddress;
-                MessageBox.Show(ipAddress);
+                currentIpAddress = connectedIPAddress[index];
+                MessageBox.Show(currentIpAddress);
                 peerConnection.ConnectToPeer(currentIpAddress);
+                reply = true;
                 peerConnection.SendStartEnd();
+                while (reply) ;
+                MessageBox.Show("They Received my ipAddress");
+                if (!peerConnection.GoodReceive)
+                {
+                    //roll back and resend the file again
+                    index--;
+                    continue;
+                }
                 ///////////////////////////////Start Of Single Peer Connection///////////////////////
                 reply = true;
                 peerConnection.SendSubdirectories(subdirectories);
