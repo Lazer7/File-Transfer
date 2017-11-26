@@ -431,6 +431,9 @@ namespace FileTransferClient.Models
             catch (Exception ex)
             {
                 Debug.Assert(false, ex.Message);
+                byte[] reply = { 0 };
+                senderSocket.Send(reply);
+                sendFileSendingNotification(EventArgs.Empty);
             }
 
         }
