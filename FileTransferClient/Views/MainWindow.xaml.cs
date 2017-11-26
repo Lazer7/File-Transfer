@@ -49,6 +49,7 @@ namespace FileTransferClient
             connectedIPAddress.Add(ipAddress);
             ConnectedIPAddressListBox.ItemsSource = connectedIPAddress;
             LabelChecking.Content = peerConnection.ConnectToPeer(ipAddress);
+            
         }
         private void SendButton_Click(object sender, RoutedEventArgs e)
         {
@@ -65,13 +66,13 @@ namespace FileTransferClient
                 reply = true;
                 peerConnection.SendStartEnd();
                 while (reply) ;
-                MessageBox.Show("They Received my ipAddress");
                 if (!peerConnection.GoodReceive)
                 {
                     //roll back and resend the file again
                     index--;
                     continue;
                 }
+                MessageBox.Show("They Received my ipAddress");
                 ///////////////////////////////Start Of Single Peer Connection///////////////////////
                 reply = true;
                 peerConnection.SendSubdirectories(subdirectories);

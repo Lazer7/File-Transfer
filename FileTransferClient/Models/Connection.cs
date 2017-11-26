@@ -184,10 +184,6 @@ namespace FileTransferClient.Models
             string hostName = Dns.GetHostName();
             IPAddress[] hostAddress = Dns.GetHostAddresses(hostName);
             byte[] metaData = hostAddress[1].GetAddressBytes();
-            foreach (byte x in metaData)
-            {
-                Debug.Assert(false, x.ToString());
-            }
             try
             {
                 MetaSenderSocket.Send(metaData);
@@ -230,6 +226,7 @@ namespace FileTransferClient.Models
                 Handler = (Socket)obj[1];
                 if (MetaSending)
                 {
+                    sendFileSendingNotification(EventArgs.Empty);
                     if (fileContents[0] == 1) { GoodReceive = true; }
                     else { GoodReceive = false; }
                     MetaSending = false;
@@ -237,10 +234,6 @@ namespace FileTransferClient.Models
                 else if (receivingSubdirectories)
                 {
                     IPAddress receivedAddressed = new IPAddress(fileContents);
-                    foreach(byte x in fileContents)
-                    {
-                        Debug.Assert(false, x.ToString());
-                    }
                     currentSocket = receivedAddressed.ToString();
                     Debug.Assert(false, "IPAddress parse" + currentSocket);
                     Debug.Assert(false, "||" + currentSocket + "||");
