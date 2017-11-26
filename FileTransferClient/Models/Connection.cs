@@ -14,7 +14,7 @@ namespace FileTransferClient.Models
         public string currentIP { get; set; }
 
         private const int PORT = 4450;
-        private const int METAPORT = 4500;
+        private const int METAPORT = 4451;
         private const int FILEBYTELIMIT = 2000000;
         private const int FILENAMEBYTELIMIT = 400;
         private const int FILEDATEBYTELIMIT = 100;
