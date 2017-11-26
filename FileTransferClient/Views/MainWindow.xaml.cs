@@ -66,12 +66,6 @@ namespace FileTransferClient
                 reply = true;
                 peerConnection.SendStartEnd();
                 while (reply) ;
-                if (!peerConnection.GoodReceive)
-                {
-                    //roll back and resend the file again
-                    index--;
-                    continue;
-                }
                 MessageBox.Show("They Received my ipAddress");
                 ///////////////////////////////Start Of Single Peer Connection///////////////////////
                 reply = true;
