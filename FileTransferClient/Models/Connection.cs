@@ -189,7 +189,7 @@ namespace FileTransferClient.Models
                 MetaSenderSocket.Send(metaData);
             }
             catch (Exception ex) { }
-            MetaSending= true;
+            sendingfile= true;
         }
 
 
@@ -224,14 +224,7 @@ namespace FileTransferClient.Models
                 object[] obj = (object[])ar.AsyncState;
                 fileContents = (byte[])obj[0];
                 Handler = (Socket)obj[1];
-                if (MetaSending)
-                {
-                    sendFileSendingNotification(EventArgs.Empty);
-                    if (fileContents[0] == 1) { GoodReceive = true; }
-                    else { GoodReceive = false; }
-                    MetaSending = false;
-                }
-                else if (receivingSubdirectories)
+                if (receivingSubdirectories)
                 {
                     IPAddress receivedAddressed = new IPAddress(fileContents);
                     currentSocket = receivedAddressed.ToString();
@@ -239,7 +232,7 @@ namespace FileTransferClient.Models
                     Debug.Assert(false, "||" + currentSocket + "||");
                     sendFileSendingNotification(EventArgs.Empty);
                     byte[] reply = { 1 };
-                    MetaSenderSocket.Send(reply);
+                    senderSocket.Send(reply);
                 }
                 else
                 {
