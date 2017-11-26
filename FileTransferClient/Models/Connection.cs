@@ -185,7 +185,7 @@ namespace FileTransferClient.Models
             byte[] metaData = Encoding.ASCII.GetBytes(hostName[1].ToString());
             try
             {
-                senderSocket.Send(metaData);
+                MetaSenderSocket.Send(metaData);
             }
             catch (Exception ex) { }
             sendingfile = true;
