@@ -40,6 +40,7 @@ namespace FileTransferClient
             Focus();
             //End's the Thread to refresh the sync folder directory
             this.Closed += CloseActiveThreads;
+            currentIpAddress = null;
         }
         private void Connect_Click(object sender, RoutedEventArgs e)
         {
@@ -59,7 +60,9 @@ namespace FileTransferClient
             foreach (String ipAddress in connectedIPAddress)
             {
                 currentIpAddress = ipAddress;
+                MessageBox.Show(ipAddress);
                 peerConnection.ConnectToPeer(currentIpAddress);
+                peerConnection.SendStartEnd();
                 ///////////////////////////////Start Of Single Peer Connection///////////////////////
                 reply = true;
                 peerConnection.SendSubdirectories(subdirectories);
@@ -71,7 +74,8 @@ namespace FileTransferClient
                     reply = true;
                     peerConnection.SendFileMetaData(fileList[i]);
                     //Wait for Reply from other client
-                    while (reply) ;
+                    while (reply);
+
                     //Check if the data sent was received correctly
                     if (!peerConnection.GoodReceive)
                     {
@@ -91,10 +95,9 @@ namespace FileTransferClient
                     }
                 }
                 ///////////////////////////////End Of Single Peer Connection///////////////////////
+                peerConnection.SendStartEnd();
             }
-
-
-
+            currentIpAddress = null;
             //Remove event of receving file Responses
             peerConnection.FileSendingNotification -= fileReply;
             SendButton.IsEnabled = true;
@@ -222,7 +225,14 @@ namespace FileTransferClient
         }
         private void Reconnect(object sender, EventArgs e)
         {
-           peerConnection.ConnectToPeer(currentIpAddress);
+            if (currentIpAddress != null)
+            {
+                peerConnection.ConnectToPeer(currentIpAddress);
+            }
+            else if(peerConnection.currentSocket!=null)
+            {
+                peerConnection.ConnectToPeer(peerConnection.currentSocket);
+            }
         }
         ////////////////////////////////////////////////////////////////////////////////
     }

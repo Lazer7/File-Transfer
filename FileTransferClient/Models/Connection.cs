@@ -14,6 +14,7 @@ namespace FileTransferClient.Models
         public string currentIP { get; set; }
 
         private const int PORT = 4450;
+        private const int METAPORT = 4500;
         private const int FILEBYTELIMIT = 2000000;
         private const int FILENAMEBYTELIMIT = 400;
         private const int FILEDATEBYTELIMIT = 100;
@@ -24,13 +25,19 @@ namespace FileTransferClient.Models
         private Socket Listener;
         private IPEndPoint endpoint;
         private Socket Handler;
+        //This Computer Meta Listener
+        private Socket MetaListener;
+        private IPEndPoint MetaEndPoint;
+        private Socket MetaHandler;
         public event EventHandler FileSendingNotification;
         //Connecting to Other Computer
         private Socket senderSocket;
+        private Socket MetaSenderSocket;
         private static System.Object lockBinaryWriter = new System.Object();
         private static System.Object lockMetaData = new System.Object();
         private bool sendingfile;
         private bool receivingSubdirectories;
+        public string currentSocket { get; set; }
         public bool GoodReceive { get; set; }
 
 
@@ -50,12 +57,20 @@ namespace FileTransferClient.Models
                 permission.Demand();
                 string hostName = Dns.GetHostName();
                 IPAddress[] hostAddress = Dns.GetHostAddresses(hostName);
+
                 endpoint = new IPEndPoint(hostAddress[1], PORT);
                 Listener = new Socket(hostAddress[1].AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                 Listener.Bind(endpoint);
                 Listener.Listen(10);
                 AsyncCallback callBack = new AsyncCallback(CallBack);
                 Listener.BeginAccept(callBack, Listener);
+
+                MetaEndPoint = new IPEndPoint(hostAddress[1], METAPORT);
+                MetaListener = new Socket(hostAddress[1].AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                MetaListener.Bind(MetaEndPoint);
+                MetaListener.Listen(5);
+                AsyncCallback metaCallBack = new AsyncCallback(MetaCallBack);
+                MetaListener.BeginAccept(metaCallBack, MetaListener);
             }
             catch (Exception ex)
             {
@@ -73,6 +88,9 @@ namespace FileTransferClient.Models
                 IPEndPoint ipEndpoint = new IPEndPoint(ipAddress, PORT);
                 senderSocket = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                 senderSocket.Connect(ipEndpoint);
+                IPEndPoint MetaIPEndpoint = new IPEndPoint(ipAddress, METAPORT);
+                MetaSenderSocket = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                MetaSenderSocket.Connect(MetaIPEndpoint);
             }
             catch (Exception ex) { return ex.ToString(); }
             return "Success";
@@ -160,6 +178,72 @@ namespace FileTransferClient.Models
             sendingfile = true;
 
         }
+        public void SendStartEnd()
+        {
+            string hostName = Dns.GetHostName();
+            IPAddress[] hostAddress = Dns.GetHostAddresses(hostName);
+            byte[] metaData = Encoding.ASCII.GetBytes(hostName[1].ToString());
+            try
+            {
+                senderSocket.Send(metaData);
+            }
+            catch (Exception ex) { }
+            sendingfile = true;
+
+        }
+
+
+
+        public void MetaCallBack(IAsyncResult ar)
+        {
+            try
+            {
+                byte[] buffer = new byte[FILEBYTELIMIT];
+                Socket currentListener = (Socket)ar.AsyncState;
+                Socket currentHandler = currentListener.EndAccept(ar);
+                currentHandler.NoDelay = false;
+                object[] obj = new object[2];
+                obj[0] = buffer;
+                obj[1] = currentHandler;
+                currentHandler.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, new AsyncCallback(MetaReceiveData), obj);
+                AsyncCallback aCallback = new AsyncCallback(MetaCallBack);
+                currentListener.BeginAccept(aCallback, currentListener);
+            }
+            catch (Exception ex)
+            {
+                Debug.Assert(false, ex.ToString());
+
+            }
+        }
+        public void MetaReceiveData(IAsyncResult ar)
+        {
+            //GetEnvironmentString
+            byte[] fileContents = null;
+            try
+            {
+                object[] obj = (object[])ar.AsyncState;
+                fileContents = (byte[])obj[0];
+                Handler = (Socket)obj[1];
+                int NumberOfBytes = fileContents.Length;
+                if (receivingSubdirectories)
+                {
+                    currentSocket = (Encoding.ASCII.GetString(fileContents)).Trim();
+                    Debug.Assert(false, "||" + currentSocket + "||");
+                }
+                else
+                {
+                    receivingSubdirectories = true;
+                    currentSocket = null;
+                }
+                sendFileSendingNotification(EventArgs.Empty);
+            }
+            catch (Exception ex) { Debug.Assert(false, "META SENT ERROR" + ex.Message); }
+         }
+
+
+
+
+
         public void CallBack(IAsyncResult ar)
         {
             try
@@ -188,7 +272,7 @@ namespace FileTransferClient.Models
             byte[] fileContents = null;
             try
             {
-
+                
                 object[] obj = (object[])ar.AsyncState;
                 fileContents = (byte[])obj[0];
                 Handler = (Socket)obj[1];
@@ -345,6 +429,12 @@ namespace FileTransferClient.Models
             }
 
         }
+
+
+
+
+
+
 
         public void PingAddress()
         {
