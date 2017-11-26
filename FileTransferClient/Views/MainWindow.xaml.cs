@@ -66,12 +66,10 @@ namespace FileTransferClient
                 reply = true;
                 peerConnection.SendStartEnd();
                 while (reply) ;
-                MessageBox.Show("They Received my ipAddress");
                 ///////////////////////////////Start Of Single Peer Connection///////////////////////
                 reply = true;
                 peerConnection.SendSubdirectories(subdirectories);
                 while (reply) ;
-                MessageBox.Show("SubDirectories sent");
 
                 for (int i = 0; i < fileList.Count; i++)
                 {
@@ -87,7 +85,6 @@ namespace FileTransferClient
                         i--;
                         continue;
                     }
-                    MessageBox.Show("They Got the MetaFile");
                     reply = true;
                     peerConnection.SendFile(fileList[i]);
                     //Wait for Reply from other client
@@ -98,7 +95,6 @@ namespace FileTransferClient
                         i--;
                         continue;
                     }
-                    MessageBox.Show("They Got the File");
                 }
                 ///////////////////////////////End Of Single Peer Connection///////////////////////
                 MessageBox.Show("They Shouldn't be here yet");

@@ -239,8 +239,10 @@ namespace FileTransferClient.Models
                 }
                 else
                 {
+                    Debug.Assert(false, "Shouldn't be here");
                     receivingSubdirectories = true;
                     currentSocket = null;
+                    sendingfile = false;
                 }
             }
             catch (Exception ex) { Debug.Assert(false, "META SENT ERROR" + ex.Message); }
@@ -289,7 +291,7 @@ namespace FileTransferClient.Models
                     sendFileSendingNotification(EventArgs.Empty);
                     if (fileContents[0] == 1) { GoodReceive = true; }
                     else { GoodReceive = false; }
-                    sendingfile = false;
+
                 }
                 else if (NumberOfBytes >= FILEBYTELIMIT && receivingSubdirectories)
                 {
@@ -374,7 +376,6 @@ namespace FileTransferClient.Models
                         }
                         else
                         {
-
                             byte[] reply = { 0 };
                             senderSocket.Send(reply);
                             sendFileSendingNotification(EventArgs.Empty);
