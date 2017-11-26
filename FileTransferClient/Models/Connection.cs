@@ -285,7 +285,7 @@ namespace FileTransferClient.Models
                 fileContents = (byte[])obj[0];
                 Handler = (Socket)obj[1];
                 int NumberOfBytes = fileContents.Length;
-
+                
                 if (sendingfile)
                 {
                     sendFileSendingNotification(EventArgs.Empty);
@@ -341,6 +341,7 @@ namespace FileTransferClient.Models
                         }
                     }
                     receivingSubdirectories = false;
+                    ConnectToPeer(this.currentSocket);
                     byte[] reply = { 1 };
                     senderSocket.Send(reply);
                     sendFileSendingNotification(EventArgs.Empty);
@@ -369,6 +370,7 @@ namespace FileTransferClient.Models
                         receivingFileName = (Encoding.ASCII.GetString(fileNameBytes)).Trim();
                         if (!receivingFileName.Equals("") && receivingFileName.Contains("."))
                         {
+                            ConnectToPeer(this.currentSocket);
                             metaData = false;
                             byte[] reply = { 1 };
                             senderSocket.Send(reply);
@@ -376,6 +378,7 @@ namespace FileTransferClient.Models
                         }
                         else
                         {
+                            ConnectToPeer(this.currentSocket);
                             byte[] reply = { 0 };
                             senderSocket.Send(reply);
                             sendFileSendingNotification(EventArgs.Empty);
@@ -418,6 +421,7 @@ namespace FileTransferClient.Models
                         Writer.Close();
                         Writer.Dispose();
                         receivingFileName = "";
+                        ConnectToPeer(this.currentSocket);
                         metaData = true;
                         byte[] reply = { 1 };
                         senderSocket.Send(reply);
