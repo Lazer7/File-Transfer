@@ -30,7 +30,7 @@ namespace FileTransferClient.Models
         private Socket senderSocket;
         private static System.Object lockBinaryWriter = new System.Object();
         private static System.Object lockMetaData = new System.Object();
-        private bool sendingfile;
+        public bool sendingfile { get; set; }
         public string currentSocket { get; set; }
         private bool receivingSubdirectories;
         public bool GoodReceive { get; set; }
