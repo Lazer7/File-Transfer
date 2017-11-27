@@ -121,6 +121,7 @@ namespace FileTransferClient
                         peerConnection.sendingfile = true;
                         //End the sync folder refresh thread
                         getNames = false;
+                        currentSocket = connectedIPAddress[0];
                             //peerConnection.ConnectToPeer(ipAddress);
                             ////////////////////////Start if Single Peer Transfer/////////////////////////////////////////////////////
                             reply = true;
@@ -156,6 +157,7 @@ namespace FileTransferClient
                         peerConnection.SendResumeMessage();
                         currentSocket = null;
                         peerConnection.sendingfile = false;
+                        peerConnection.startSync = true;
                         //Remove event of receving file Responses
                         peerConnection.FileSendingNotification -= fileReply;
                         //Restart sync folder refresh directory
@@ -164,6 +166,7 @@ namespace FileTransferClient
                         {
                             StatusLabel.Content = "Standby";
                         });
+                        Thread.Sleep(10000);
                     }
                     Thread.Sleep(5000);
                 }
