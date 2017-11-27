@@ -127,6 +127,7 @@ namespace FileTransferClient.Models
             foreach (byte x in Encoding.ASCII.GetBytes(File.GetLastWriteTime(fileDirectory).ToString()))
             {
                 metaData[counter] = x;
+                Console.WriteLine(metaData[counter]);
                 counter++;
             }
             try
@@ -244,7 +245,6 @@ namespace FileTransferClient.Models
                         }
                         if (!System.IO.Directory.Exists(folderName + refinedDirectory))
                         {
-                            Debug.Assert(false, refinedDirectory);
                             System.IO.Directory.CreateDirectory(folderName + refinedDirectory);
                         }
                     }
