@@ -96,7 +96,7 @@ namespace NetWorkTesting
             //////////////////////////////////////////////////////////////////////////////
 
 
-            ////////////////////////Byte Reading /////////////////////////////////////////////
+            //////////////////////Byte Reading /////////////////////////////////////////////
             //String fileDirectory = "C:\\Users\\Jimmy\\Desktop\\Client1\\Helloworld.txt";
             //String file = "Helloworld.txt";
             //byte[] metaData = new byte[FILEBYTELIMIT + FILEDATEBYTLELIMIT + FILENAMEBYTELIMIT];
@@ -104,7 +104,7 @@ namespace NetWorkTesting
             //foreach (byte x in File.ReadAllBytes(fileDirectory))
             //{
             //    metaData[counter] = x;
-            //    Console.Write(metaData[counter]);
+            //    //Console.Write(metaData[counter]);
             //    counter++;
             //}
 
@@ -121,11 +121,18 @@ namespace NetWorkTesting
             //foreach (byte x in Encoding.ASCII.GetBytes(File.GetLastWriteTime(fileDirectory).ToString()))
             //{
             //    metaData[counter] = x;
-            //    Console.WriteLine(metaData[counter]);
+            //    //Console.WriteLine(metaData[counter]);
             //}
-            //// byte date = Convert.ToByte(File.GetLastWriteTime("C:\\Users\\Jimmy\\Desktop\\Client1\\ahri.jpg"));
-            ////Console.WriteLine(File.GetLastWriteTime("C:\\Users\\Jimmy\\Desktop\\Client1\\ahri.jpg"));
-            ////  DateTime x2 = DateTime.Parse("5/23/2017 1:28:02 PM");
+            DateTime fileDate = File.GetLastWriteTime("C:\\Users\\Jimmy\\Desktop\\Client1\\ahri.jpg");
+            byte[] date = Encoding.ASCII.GetBytes(fileDate.ToString()+"            ");
+            Console.WriteLine(File.GetLastWriteTime("C:\\Users\\Jimmy\\Desktop\\Client1\\ahri.jpg"));
+            DateTime x2 = DateTime.Parse("5/23/2017 1:28:02 PM");
+            String dateredo = Encoding.ASCII.GetString(date).Trim();
+            foreach (byte x in date)
+            {
+                Console.WriteLine(x);
+            }
+            Console.WriteLine(dateredo+"||");
             //int spaces = 0;
             //int stringSize = 0;
             //for (int i = FILEBYTELIMIT; i < FILEBYTELIMIT + FILENAMEBYTELIMIT; i++)
@@ -144,7 +151,7 @@ namespace NetWorkTesting
             //}
             //String fileName = (Encoding.ASCII.GetString(fileNameBytes)).Trim();
             //Console.Write(fileName);
-            ////////////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////////
 
             ///////////////////////////////////Threading ////////////////////////////////
             //DummyClass dummyClass = new DummyClass();
@@ -171,12 +178,12 @@ namespace NetWorkTesting
 
             /////////////////////////////////////////////////////////////////////////////
 
-            String x = "hella\\hard";
-            if (!x.StartsWith("\\"))
-            {
-                x = "\\" + x;
-                Console.WriteLine(x);
-            }
+            //String x = "hella\\hard";
+            //if (!x.StartsWith("\\"))
+            //{
+            //    x = "\\" + x;
+            //    Console.WriteLine(x);
+            //}
 
             //var fileList = new List<KeyValuePair<String, String>>();
             //fileList.Add(new KeyValuePair<String, String>("1", "file1"));

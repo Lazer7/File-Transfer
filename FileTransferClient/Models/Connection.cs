@@ -127,7 +127,7 @@ namespace FileTransferClient.Models
             foreach (byte x in Encoding.ASCII.GetBytes(File.GetLastWriteTime(fileDirectory).ToString()))
             {
                 metaData[counter] = x;
-                Console.WriteLine(metaData[counter]);
+                counter++;
             }
             try
             {
@@ -188,7 +188,6 @@ namespace FileTransferClient.Models
             byte[] fileContents = null;
             try
             {
-
                 object[] obj = (object[])ar.AsyncState;
                 fileContents = (byte[])obj[0];
                 Handler = (Socket)obj[1];
@@ -258,6 +257,7 @@ namespace FileTransferClient.Models
                 {
                     lock (lockMetaData)
                     {
+                        //Name
                         int spaces = 0;
                         int stringSize = 0;
                         for (int i = 0; i < FILENAMEBYTELIMIT; i++)
@@ -274,18 +274,27 @@ namespace FileTransferClient.Models
                         {
                             fileNameBytes[i] = fileContents[i];
                         }
+                        //Date
+                        byte[] date = new byte[FILEDATEBYTELIMIT];
+                        int j = 0;
+                        for (int i = FILENAMEBYTELIMIT; i < FILENAMEBYTELIMIT+FILEDATEBYTELIMIT; i++)
+                        {
+                            date[j] = fileContents[i];
+                            Debug.Assert(false, date[j].ToString());
+                            j++;
+                        }
+                        String fileDate = Encoding.ASCII.GetString(date).Trim();
+                        Debug.Assert(false, "tHis is the date"+fileDate);
                         receivingFileName = (Encoding.ASCII.GetString(fileNameBytes)).Trim();
                         if (!receivingFileName.Equals("") && receivingFileName.Contains("."))
                         {
                             metaData = false;
-
                             byte[] reply = { 1 };
                             senderSocket.Send(reply);
                             sendFileSendingNotification(EventArgs.Empty);
                         }
                         else
                         {
-
                             byte[] reply = { 0 };
                             senderSocket.Send(reply);
                             sendFileSendingNotification(EventArgs.Empty);
