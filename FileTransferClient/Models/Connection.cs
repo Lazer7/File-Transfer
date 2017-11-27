@@ -218,27 +218,29 @@ namespace FileTransferClient.Models
         {
             //GetEnvironmentString
             byte[] fileContents = null;
-           
+
             try
             {
                 object[] obj = (object[])ar.AsyncState;
                 fileContents = (byte[])obj[0];
                 Handler = (Socket)obj[1];
                 int NumberOfBytes = fileContents.Length;
-                if (startSync)
+
+
+                if (sendingfile)
+                {
+                    sendFileSendingNotification(EventArgs.Empty);
+                    if (fileContents[0] == 1) { GoodReceive = true; }
+                    else { GoodReceive = false; }
+                    sendingfile = false;
+                }
+                else if (startSync)
                 {
                     startSync = false;
                 }
                 else
-                {
-                    if (sendingfile)
-                    {
-                        sendFileSendingNotification(EventArgs.Empty);
-                        if (fileContents[0] == 1) { GoodReceive = true; }
-                        else { GoodReceive = false; }
-                        sendingfile = false;
-                    }
-                    else if (NumberOfBytes >= FILEBYTELIMIT && receivingSubdirectories)
+                { 
+                    if (NumberOfBytes >= FILEBYTELIMIT && receivingSubdirectories)
                     {
                         List<String> receivedDirectories = new List<string>();
                         int index = 1;

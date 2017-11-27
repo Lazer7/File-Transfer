@@ -115,7 +115,9 @@ namespace FileTransferClient
                         {
                             StatusLabel.Content = "Syncing";
                         });
+                        reply = true;
                         peerConnection.SendHaltResumeMessage();
+                        while (reply) ;
                         //this event allows the program to continue to send data after receiving a message that the other client has recieved the previous data
                         peerConnection.FileSendingNotification += fileReply;
                         peerConnection.sendingfile = true;
