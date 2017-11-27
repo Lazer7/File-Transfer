@@ -110,6 +110,7 @@ namespace FileTransferClient
         }
         private void DisconnectButton_Click(object sender, RoutedEventArgs e)
         {
+            peerConnection.Disconnect();
             String ipAddress = (String)ConnectedIPAddressListBox.SelectedItem;
             connectedIPAddress.Remove(ipAddress);
         }

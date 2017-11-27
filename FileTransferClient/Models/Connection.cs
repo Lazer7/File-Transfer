@@ -326,7 +326,6 @@ namespace FileTransferClient.Models
                             senderSocket.Send(reply);
                             sendFileSendingNotification(EventArgs.Empty);
                         }
-
                     }
                 }
                 else if (NumberOfBytes >= FILEBYTELIMIT && !metaData)
@@ -389,11 +388,9 @@ namespace FileTransferClient.Models
                         {
                             fileContentsdecrypt[i] = fileContents[i];
                         }
-
                         byte[] reply = { 1 };
                         senderSocket.Send(reply);
                         sendFileSendingNotification(EventArgs.Empty);
-
                     }
                 }
 
@@ -405,7 +402,29 @@ namespace FileTransferClient.Models
             }
 
         }
+        public void Disconnect()
+        {
+            senderSocket.Shutdown(SocketShutdown.Both);
+            //Closes the Socket connection and releases all resources 
+            senderSocket.Close();
+        }
 
+
+
+        public void checkSocketConnection()
+        {
+            new Thread(() =>
+            {
+                if (senderSocket != null)
+                {
+                    if (!senderSocket.Connected)
+                    {
+                        Debug.Assert(false, "Socket is Disconnected");
+                    }
+                }
+                Thread.Sleep(1000);
+            }).Start();
+        }
         public void PingAddress()
         {
             new Thread(() =>
