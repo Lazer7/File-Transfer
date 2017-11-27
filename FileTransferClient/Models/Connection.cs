@@ -18,6 +18,7 @@ namespace FileTransferClient.Models
         private const int FILENAMEBYTELIMIT = 400;
         private const int FILEDATEBYTELIMIT = 100;
         private bool metaData { get; set; }
+        private DateTime metaDate { get; set; }
         private String folderName;
         private String receivingFileName;
         //This Computer
@@ -281,12 +282,11 @@ namespace FileTransferClient.Models
                         for (int i = FILENAMEBYTELIMIT; i < FILENAMEBYTELIMIT+FILEDATEBYTELIMIT; i++)
                         {
                             date[j] = fileContents[i];
-                            Debug.Assert(false, date[j].ToString());
                             j++;
                         }
                         String fileDate = Encoding.ASCII.GetString(date).Trim();
-                        Debug.Assert(false, "tHis is the date"+fileDate);
                         receivingFileName = (Encoding.ASCII.GetString(fileNameBytes)).Trim();
+                        metaDate = DateTime.Parse(fileDate);
                         if (!receivingFileName.Equals("") && receivingFileName.Contains("."))
                         {
                             metaData = false;
@@ -308,9 +308,39 @@ namespace FileTransferClient.Models
                     lock (lockBinaryWriter)
                     {
                         BinaryWriter Writer;
+                        bool fileExist = false;
+                        DateTime currentFile= new DateTime();
                         try
                         {
-                            Writer = new BinaryWriter(File.OpenWrite(folderName + "\\" + receivingFileName));
+                            String[] fileNames = Directory.GetFiles(folderName);
+                            foreach (String file in fileNames)
+                            {
+                                if (receivingFileName.Equals(file))
+                                {
+                                    fileExist = true;
+                                    currentFile = File.GetLastWriteTime(folderName + "\\" + file);
+                                }
+                            }
+                            if (!fileExist)
+                            {
+                                Writer = new BinaryWriter(File.OpenWrite(folderName + "\\" + receivingFileName));
+                                Writer.Write(fileContents);
+                                Writer.Flush();
+                                Writer.Close();
+                                Writer.Dispose();
+                                receivingFileName = "";
+                                metaData = true;
+                            }
+                            else if ((metaDate > currentFile))
+                            {
+                                Writer = new BinaryWriter(File.OpenWrite(folderName + "\\" + receivingFileName));
+                                Writer.Write(fileContents);
+                                Writer.Flush();
+                                Writer.Close();
+                                Writer.Dispose();
+                                receivingFileName = "";
+                                metaData = true;
+                            }
                         }
                         catch
                         {
@@ -332,13 +362,6 @@ namespace FileTransferClient.Models
                         {
                             fileContentsdecrypt[i] = fileContents[i];
                         }
-
-                        Writer.Write(fileContents);
-                        Writer.Flush();
-                        Writer.Close();
-                        Writer.Dispose();
-                        receivingFileName = "";
-                        metaData = true;
 
                         byte[] reply = { 1 };
                         senderSocket.Send(reply);

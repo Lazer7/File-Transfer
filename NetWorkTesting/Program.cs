@@ -127,12 +127,14 @@ namespace NetWorkTesting
             byte[] date = Encoding.ASCII.GetBytes(fileDate.ToString()+"            ");
             Console.WriteLine(File.GetLastWriteTime("C:\\Users\\Jimmy\\Desktop\\Client1\\ahri.jpg"));
             DateTime x2 = DateTime.Parse("5/23/2017 1:28:02 PM");
+            DateTime x3 = DateTime.Parse("5/23/2017 1:28:01 PM");
             String dateredo = Encoding.ASCII.GetString(date).Trim();
-            foreach (byte x in date)
-            {
-                Console.WriteLine(x);
-            }
             Console.WriteLine(dateredo+"||");
+            if (x2 < x3)
+            {
+                Console.WriteLine("HERE");
+            }
+
             //int spaces = 0;
             //int stringSize = 0;
             //for (int i = FILEBYTELIMIT; i < FILEBYTELIMIT + FILENAMEBYTELIMIT; i++)

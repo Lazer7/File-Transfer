@@ -60,7 +60,6 @@ namespace FileTransferClient
             peerConnection.SendSubdirectories(subdirectories);
             while (reply) ;
             MessageBox.Show("SubDirectories sent");
-
             for (int i = 0; i < fileList.Count; i++)
             {
                 reply = true;
