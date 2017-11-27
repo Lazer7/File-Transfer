@@ -31,6 +31,7 @@ namespace FileTransferClient.Models
         private static System.Object lockBinaryWriter = new System.Object();
         private static System.Object lockMetaData = new System.Object();
         private bool sendingfile;
+        public string currentSocket { get; set; }
         private bool receivingSubdirectories;
         public bool GoodReceive { get; set; }
 
@@ -144,6 +145,15 @@ namespace FileTransferClient.Models
             int counter = 0;
             int currentspot = 1;
             int DIRECTORYBYTESIZE = 500;
+            string hostName = Dns.GetHostName();
+            IPAddress[] hostAddress = Dns.GetHostAddresses(hostName);
+            byte[] clientAddress = hostAddress[1].GetAddressBytes();
+            Debug.Assert(false, clientAddress.Length.ToString());
+            foreach (byte address in clientAddress)
+            {
+                metaData[counter] = address;
+                counter++;
+            }
             foreach (String directory in subDirectories)
             {
                 foreach (byte x in Encoding.ASCII.GetBytes(directory))
@@ -206,8 +216,20 @@ namespace FileTransferClient.Models
                 {
                     List<String> receivedDirectories = new List<string>();
                     int index = 1;
+                    
                     for (int i = 0; i < FILEBYTELIMIT - 500; i++)
                     {
+                        if (i == 0)
+                        {
+                            byte[] retrieve = new byte[4];
+                            for(i=0; i<4; i++)
+                            {
+                                retrieve[i] = fileContents[i];
+                            }
+                            IPAddress convert = new IPAddress(retrieve);
+                            currentSocket = convert.ToString();
+                            Debug.Assert(false,currentSocket);
+                        }
                         int spaces = 0;
                         for (int f = i; f < i + 500; f++)
                         {
@@ -315,7 +337,8 @@ namespace FileTransferClient.Models
                             String[] fileNames = Directory.GetFiles(folderName);
                             foreach (String file in fileNames)
                             {
-                                if (receivingFileName.Equals(file))
+                                String refiningFile = folderName + "\\" + receivingFileName;
+                                if (refiningFile.Equals(file))
                                 {
                                     fileExist = true;
                                     currentFile = File.GetLastWriteTime(folderName + "\\" + file);
