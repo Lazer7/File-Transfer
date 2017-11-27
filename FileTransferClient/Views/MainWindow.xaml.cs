@@ -48,6 +48,7 @@ namespace FileTransferClient
             //Creates a socket for the selected ip 
             connectedIPAddress.Add(ipAddress);
             ConnectedIPAddressListBox.ItemsSource = connectedIPAddress;
+            peerConnection.ConnectToPeer(ipAddress);
         }
         private void SendButton_Click(object sender, RoutedEventArgs e)
         {
@@ -165,12 +166,12 @@ namespace FileTransferClient
                             String fileName = directory+"\\"+ file.Substring(file.LastIndexOf('\\') + 1);
                             fileList.Add(fileName);
                         }
-                        this.Dispatcher.InvokeAsync(() =>
-                        {
-                            FileListBox.ItemsSource = fileList;
-                            FileListBox.Items.Refresh();
-                        });
                     }
+                    this.Dispatcher.InvokeAsync(() =>
+                    {
+                        FileListBox.ItemsSource = fileList;
+                        FileListBox.Items.Refresh();
+                    });
                     Thread.Sleep(2000);
                 }
             }).Start();
@@ -195,7 +196,6 @@ namespace FileTransferClient
                     List<String> temp = subdirectoryEntries(x, previousDirectory + currentDirectory);
                     foreach (String y in temp)
                     {
-
                         internalsubdirectory.Add(y);
                     }
                 }

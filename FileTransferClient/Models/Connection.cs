@@ -48,6 +48,10 @@ namespace FileTransferClient.Models
         {
             try
             {
+                if (Listener != null)
+                {
+                    Listener.Close();
+                }
                 SocketPermission permission = new SocketPermission(NetworkAccess.Connect, TransportType.Tcp, "", SocketPermission.AllPorts);
                 permission.Demand();
                 string hostName = Dns.GetHostName();
@@ -69,6 +73,7 @@ namespace FileTransferClient.Models
         {
             try
             {
+                senderSocket = null;
                 SocketPermission permission = new SocketPermission(NetworkAccess.Connect, TransportType.Tcp, "", SocketPermission.AllPorts);
                 permission.Demand();
                 IPAddress ipAddress = IPAddress.Parse(Address);
@@ -148,7 +153,6 @@ namespace FileTransferClient.Models
             string hostName = Dns.GetHostName();
             IPAddress[] hostAddress = Dns.GetHostAddresses(hostName);
             byte[] clientAddress = hostAddress[1].GetAddressBytes();
-            Debug.Assert(false, clientAddress.Length.ToString());
             foreach (byte address in clientAddress)
             {
                 metaData[counter] = address;
