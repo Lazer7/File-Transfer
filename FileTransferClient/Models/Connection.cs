@@ -34,6 +34,7 @@ namespace FileTransferClient.Models
         public string currentSocket { get; set; }
         private bool receivingSubdirectories;
         public bool GoodReceive { get; set; }
+        public bool startSync { get; set; }
 
 
         public Connection(string folderName)
@@ -42,16 +43,13 @@ namespace FileTransferClient.Models
             sendingfile = false;
             metaData = true;
             receivingSubdirectories = true;
+            startSync = true;
         }
         public String GetSyncFolderName() { return folderName; }
         public string CreatePeerConnection()
         {
             try
             {
-                if (Listener != null)
-                {
-                    Listener.Close();
-                }
                 SocketPermission permission = new SocketPermission(NetworkAccess.Connect, TransportType.Tcp, "", SocketPermission.AllPorts);
                 permission.Demand();
                 string hostName = Dns.GetHostName();
@@ -73,7 +71,6 @@ namespace FileTransferClient.Models
         {
             try
             {
-                senderSocket = null;
                 SocketPermission permission = new SocketPermission(NetworkAccess.Connect, TransportType.Tcp, "", SocketPermission.AllPorts);
                 permission.Demand();
                 IPAddress ipAddress = IPAddress.Parse(Address);
@@ -202,6 +199,7 @@ namespace FileTransferClient.Models
         {
             //GetEnvironmentString
             byte[] fileContents = null;
+            startSync = false;
             try
             {
                 object[] obj = (object[])ar.AsyncState;
@@ -404,9 +402,9 @@ namespace FileTransferClient.Models
         }
         public void Disconnect()
         {
-            senderSocket.Shutdown(SocketShutdown.Both);
-            //Closes the Socket connection and releases all resources 
+            senderSocket.Dispose();
             senderSocket.Close();
+            senderSocket = null;
         }
 
 

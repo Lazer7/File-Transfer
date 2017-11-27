@@ -23,7 +23,7 @@ namespace FileTransferClient
         //(geply) check if file was sent correctly
         //(getNames) halts the refresh of the directory get list of files  
         string currentSocket;
-        bool reply,getNames;
+        bool reply,getNames,isConnected;
         ////////////////////Window Form Functions ////////////////
         public MainWindow()
         {
@@ -40,7 +40,7 @@ namespace FileTransferClient
             Focus();
             //End's the Thread to refresh the sync folder directory
             this.Closed += CloseActiveThreads;
-            currentSocket = null;
+
         }
         private void Connect_Click(object sender, RoutedEventArgs e)
         {
@@ -49,6 +49,7 @@ namespace FileTransferClient
             connectedIPAddress.Add(ipAddress);
             ConnectedIPAddressListBox.ItemsSource = connectedIPAddress;
             peerConnection.ConnectToPeer(ipAddress);
+            isConnected = true;
         }
         private void SendButton_Click(object sender, RoutedEventArgs e)
         {
@@ -61,7 +62,7 @@ namespace FileTransferClient
             foreach (string ipAddress in connectedIPAddress)
             {
                 currentSocket = ipAddress;
-                peerConnection.ConnectToPeer(ipAddress);
+                //peerConnection.ConnectToPeer(ipAddress);
                 ////////////////////////Start if Single Peer Transfer/////////////////////////////////////////////////////
                 reply = true;
                 peerConnection.SendSubdirectories(subdirectories);
@@ -93,7 +94,6 @@ namespace FileTransferClient
                 }
                 //////////////////////////////////End Single Peer Connection///////////////////////////////////
             }
-
             currentSocket = null;
             peerConnection.sendingfile = false;
             //Remove event of receving file Responses
@@ -101,8 +101,83 @@ namespace FileTransferClient
             SendButton.IsEnabled = true;
             //Restart sync folder refresh directory
             GetFileNames();
-
         }
+
+
+        private void SendFile()
+        {
+            new Thread(() =>
+            {
+                while (true)
+                {
+                    if (peerConnection.startSync && isConnected)
+                    {
+                        //this event allows the program to continue to send data after receiving a message that the other client has recieved the previous data
+                        peerConnection.FileSendingNotification += fileReply;
+                        peerConnection.sendingfile = true;
+                        //End the sync folder refresh thread
+                        getNames = false;
+                        foreach (string ipAddress in connectedIPAddress)
+                        {
+                            currentSocket = ipAddress;
+                            //peerConnection.ConnectToPeer(ipAddress);
+                            ////////////////////////Start if Single Peer Transfer/////////////////////////////////////////////////////
+                            reply = true;
+                            peerConnection.SendSubdirectories(subdirectories);
+                            while (reply) ;
+                            MessageBox.Show("SubDirectories sent");
+                            for (int i = 0; i < fileList.Count; i++)
+                            {
+                                reply = true;
+                                peerConnection.SendFileMetaData(fileList[i]);
+                                //Wait for Reply from other client
+                                while (reply) ;
+                                //Check if the data sent was received correctly
+                                if (!peerConnection.GoodReceive)
+                                {
+                                    //roll back and resend the file again
+                                    i--;
+                                    continue;
+                                }
+                                reply = true;
+                                peerConnection.SendFile(fileList[i]);
+                                //Wait for Reply from other client
+                                while (reply) ;
+                                if (!peerConnection.GoodReceive)
+                                {
+                                    //roll back and resend the file again
+                                    i--;
+                                    continue;
+                                }
+                            }
+                            //////////////////////////////////End Single Peer Connection///////////////////////////////////
+                        }
+                        currentSocket = null;
+                        peerConnection.sendingfile = false;
+                        //Remove event of receving file Responses
+                        peerConnection.FileSendingNotification -= fileReply;
+                        //Restart sync folder refresh directory
+                        GetFileNames();
+                    }
+                    Thread.Sleep(5000);
+                }
+            }).Start();
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         private void Refresh_Click(object sender, RoutedEventArgs e)
         {
             peerConnection.PingAddress();
@@ -113,6 +188,7 @@ namespace FileTransferClient
             peerConnection.Disconnect();
             String ipAddress = (String)ConnectedIPAddressListBox.SelectedItem;
             connectedIPAddress.Remove(ipAddress);
+            ConnectedIPAddressListBox.ItemsSource = connectedIPAddress;
         }
         private void Folder_Click(object sender, RoutedEventArgs e)
         {
@@ -137,10 +213,14 @@ namespace FileTransferClient
             //////////////////////////////////////////////////////////////
             AvailableIPAddressListBox.ItemsSource = peerConnection.GetIpAddress();
             GetFileNames();
+            SendFile();
             DisconnectButton.IsEnabled = true;
             ConnectingB.IsEnabled = true;
             RefreshButton.IsEnabled = true;
             SendButton.IsEnabled = true;
+            currentSocket = null;
+            StatusLabel.Content = "Standby";
+            isConnected = false;
         }
         ////////////////////Data Retrieval Functions//////////////////////////////////////
         private void GetFileNames()

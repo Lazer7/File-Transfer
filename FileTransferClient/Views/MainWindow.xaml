@@ -20,6 +20,7 @@
         <ListBox Name="FileListBox" HorizontalAlignment="Left" Height="162" Margin="504,113,0,0" VerticalAlignment="Top" Width="232"/>
         <Label Content="Files" HorizontalAlignment="Left" Margin="504,87,0,0" VerticalAlignment="Top"/>
         <Viewbox HorizontalAlignment="Left" Height="100" Margin="586,311,0,-56.6" VerticalAlignment="Top" Width="100"/>
+        <Label Name="StatusLabel" HorizontalAlignment="Left" Margin="336,325,0,0" VerticalAlignment="Top"/>
 
     </Grid>
 </Window>
