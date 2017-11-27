@@ -105,15 +105,14 @@ namespace FileTransferClient.Models
             }
             return ipAddressList;
         }
-        public void SendHaltResumeMessage()
+        public void SendResumeMessage()
         {
             String endCode = "";
             for (int i = 0; i < 200; i++)
             {
                 endCode += i;
             }
-            Debug.Assert(false, endCode);
-            byte[] haltMessage = Encoding.ASCII.GetBytes(endCode);
+            byte[] haltMessage = Encoding.ASCII.GetBytes(endCode); //490bytes length
             try
             {
                 senderSocket.Send(haltMessage);
@@ -225,8 +224,26 @@ namespace FileTransferClient.Models
                 fileContents = (byte[])obj[0];
                 Handler = (Socket)obj[1];
                 int NumberOfBytes = fileContents.Length;
-
-
+                startSync = false;
+                byte[] resumeSync = new byte[490];
+                for (int i = 0; i < 490; i++)
+                {
+                    resumeSync[i] = fileContents[i];
+                }
+                String endCode = "";
+                for (int i = 0; i < 200; i++)
+                {
+                    endCode += i;
+                }
+                String haltMessage = Encoding.ASCII.GetString(resumeSync);
+                if (haltMessage.Equals(endCode))
+                {
+                    startSync = true;
+                    receivingSubdirectories = true;
+                    metaData = true;
+                    sendFileSendingNotification(EventArgs.Empty);
+                    return;
+                }
                 if (sendingfile)
                 {
                     sendFileSendingNotification(EventArgs.Empty);
@@ -234,190 +251,185 @@ namespace FileTransferClient.Models
                     else { GoodReceive = false; }
                     sendingfile = false;
                 }
-                else if (startSync)
+                else if (NumberOfBytes >= FILEBYTELIMIT && receivingSubdirectories)
                 {
-                    startSync = false;
+                    List<String> receivedDirectories = new List<string>();
+                    int index = 1;
+
+                    for (int i = 0; i < FILEBYTELIMIT - 500; i++)
+                    {
+                        if (i == 0)
+                        {
+                            byte[] retrieve = new byte[4];
+                            for (i = 0; i < 4; i++)
+                            {
+                                retrieve[i] = fileContents[i];
+                            }
+                            IPAddress convert = new IPAddress(retrieve);
+                            currentSocket = convert.ToString();
+                            Debug.Assert(false, currentSocket);
+                        }
+                        int spaces = 0;
+                        for (int f = i; f < i + 500; f++)
+                        {
+                            if (fileContents[f] != 0)
+                            {
+                                spaces++;
+                            }
+                            else { break; }
+                        }
+                        byte[] currentName = new byte[spaces];
+                        for (int j = 0; j < spaces; j++)
+                        {
+                            if (fileContents[i + j] != 0)
+                            {
+                                currentName[j] = fileContents[j + i];
+                            }
+                            else { break; }
+                        }
+                        string parseDirectory = (Encoding.ASCII.GetString(currentName)).Trim();
+
+                        if (parseDirectory.Equals(""))
+                        {
+                            break;
+                        }
+                        receivedDirectories.Add(parseDirectory);
+                        i = index * 500;
+                        index++;
+                    }
+                    foreach (String directory in receivedDirectories)
+                    {
+
+                        String refinedDirectory = directory;
+                        if (!refinedDirectory[0].Equals("\\"))
+                        {
+                            refinedDirectory = "\\" + directory;
+                        }
+                        if (!System.IO.Directory.Exists(folderName + refinedDirectory))
+                        {
+                            System.IO.Directory.CreateDirectory(folderName + refinedDirectory);
+                        }
+                    }
+                    sendFileSendingNotification(EventArgs.Empty);
+                    receivingSubdirectories = false;
+                    byte[] reply = { 1 };
+                    senderSocket.Send(reply);
+                    sendFileSendingNotification(EventArgs.Empty);
                 }
-                else
-                { 
-                    if (NumberOfBytes >= FILEBYTELIMIT && receivingSubdirectories)
+
+                else if (NumberOfBytes >= FILENAMEBYTELIMIT && metaData)
+                {
+                    lock (lockMetaData)
                     {
-                        List<String> receivedDirectories = new List<string>();
-                        int index = 1;
-
-                        for (int i = 0; i < FILEBYTELIMIT - 500; i++)
+                        //Name
+                        int spaces = 0;
+                        int stringSize = 0;
+                        for (int i = 0; i < FILENAMEBYTELIMIT; i++)
                         {
-                            if (i == 0)
+                            if (fileContents[i] == 0)
                             {
-                                byte[] retrieve = new byte[4];
-                                for (i = 0; i < 4; i++)
-                                {
-                                    retrieve[i] = fileContents[i];
-                                }
-                                IPAddress convert = new IPAddress(retrieve);
-                                currentSocket = convert.ToString();
-                                Debug.Assert(false, currentSocket);
+                                spaces++;
                             }
-                            int spaces = 0;
-                            for (int f = i; f < i + 500; f++)
-                            {
-                                if (fileContents[f] != 0)
-                                {
-                                    spaces++;
-                                }
-                                else { break; }
-                            }
-                            byte[] currentName = new byte[spaces];
-                            for (int j = 0; j < spaces; j++)
-                            {
-                                if (fileContents[i + j] != 0)
-                                {
-                                    currentName[j] = fileContents[j + i];
-                                }
-                                else { break; }
-                            }
-                            string parseDirectory = (Encoding.ASCII.GetString(currentName)).Trim();
-
-                            if (parseDirectory.Equals(""))
-                            {
-                                break;
-                            }
-                            receivedDirectories.Add(parseDirectory);
-                            i = index * 500;
-                            index++;
+                            if (spaces == 1) { break; }
+                            stringSize++;
                         }
-                        foreach (String directory in receivedDirectories)
+                        byte[] fileNameBytes = new byte[stringSize];
+                        for (int i = 0; i < stringSize; i++)
                         {
-
-                            String refinedDirectory = directory;
-                            if (!refinedDirectory[0].Equals("\\"))
-                            {
-                                refinedDirectory = "\\" + directory;
-                            }
-                            if (!System.IO.Directory.Exists(folderName + refinedDirectory))
-                            {
-                                System.IO.Directory.CreateDirectory(folderName + refinedDirectory);
-                            }
+                            fileNameBytes[i] = fileContents[i];
                         }
-                        receivingSubdirectories = false;
-                        byte[] reply = { 1 };
-                        senderSocket.Send(reply);
-                        sendFileSendingNotification(EventArgs.Empty);
-                    }
-
-                    else if (NumberOfBytes >= FILENAMEBYTELIMIT && metaData)
-                    {
-                        lock (lockMetaData)
+                        //Date
+                        byte[] date = new byte[FILEDATEBYTELIMIT];
+                        int j = 0;
+                        for (int i = FILENAMEBYTELIMIT; i < FILENAMEBYTELIMIT + FILEDATEBYTELIMIT; i++)
                         {
-                            //Name
-                            int spaces = 0;
-                            int stringSize = 0;
-                            for (int i = 0; i < FILENAMEBYTELIMIT; i++)
-                            {
-                                if (fileContents[i] == 0)
-                                {
-                                    spaces++;
-                                }
-                                if (spaces == 1) { break; }
-                                stringSize++;
-                            }
-                            byte[] fileNameBytes = new byte[stringSize];
-                            for (int i = 0; i < stringSize; i++)
-                            {
-                                fileNameBytes[i] = fileContents[i];
-                            }
-                            //Date
-                            byte[] date = new byte[FILEDATEBYTELIMIT];
-                            int j = 0;
-                            for (int i = FILENAMEBYTELIMIT; i < FILENAMEBYTELIMIT + FILEDATEBYTELIMIT; i++)
-                            {
-                                date[j] = fileContents[i];
-                                j++;
-                            }
-                            String fileDate = Encoding.ASCII.GetString(date).Trim();
-                            receivingFileName = (Encoding.ASCII.GetString(fileNameBytes)).Trim();
-                            metaDate = DateTime.Parse(fileDate);
-                            if (!receivingFileName.Equals("") && receivingFileName.Contains("."))
-                            {
-                                metaData = false;
-                                byte[] reply = { 1 };
-                                senderSocket.Send(reply);
-                                sendFileSendingNotification(EventArgs.Empty);
-                            }
-                            else
-                            {
-                                byte[] reply = { 0 };
-                                senderSocket.Send(reply);
-                                sendFileSendingNotification(EventArgs.Empty);
-                            }
+                            date[j] = fileContents[i];
+                            j++;
                         }
-                    }
-                    else if (NumberOfBytes >= FILEBYTELIMIT && !metaData)
-                    {
-                        lock (lockBinaryWriter)
+                        String fileDate = Encoding.ASCII.GetString(date).Trim();
+                        receivingFileName = (Encoding.ASCII.GetString(fileNameBytes)).Trim();
+                        metaDate = DateTime.Parse(fileDate);
+                        if (!receivingFileName.Equals("") && receivingFileName.Contains("."))
                         {
-                            BinaryWriter Writer;
-                            bool fileExist = false;
-                            DateTime currentFile = new DateTime();
-                            try
-                            {
-                                String[] fileNames = Directory.GetFiles(folderName);
-                                foreach (String file in fileNames)
-                                {
-                                    String refiningFile = folderName + "\\" + receivingFileName;
-                                    if (refiningFile.Equals(file))
-                                    {
-                                        fileExist = true;
-                                        currentFile = File.GetLastWriteTime(folderName + "\\" + file);
-                                    }
-                                }
-                                if (!fileExist)
-                                {
-                                    Writer = new BinaryWriter(File.OpenWrite(folderName + "\\" + receivingFileName));
-                                    Writer.Write(fileContents);
-                                    Writer.Flush();
-                                    Writer.Close();
-                                    Writer.Dispose();
-                                    receivingFileName = "";
-                                    metaData = true;
-                                }
-                                else if ((metaDate > currentFile))
-                                {
-                                    Writer = new BinaryWriter(File.OpenWrite(folderName + "\\" + receivingFileName));
-                                    Writer.Write(fileContents);
-                                    Writer.Flush();
-                                    Writer.Close();
-                                    Writer.Dispose();
-                                    receivingFileName = "";
-                                    metaData = true;
-                                }
-                            }
-                            catch
-                            {
-                                String[] tempList = Directory.GetFiles(folderName);
-                                receivingFileName = "corruptedDownload.txt";
-                                int counter = 1;
-                                foreach (String x in tempList)
-                                {
-                                    if (x.Contains(receivingFileName))
-                                    {
-                                        receivingFileName = "corruptedDownload(" + counter + ").txt";
-                                    }
-
-                                }
-                                Writer = new BinaryWriter(File.OpenWrite(folderName + "\\" + receivingFileName));
-                            }
-                            byte[] fileContentsdecrypt = new byte[FILEBYTELIMIT];
-                            for (int i = 0; i < FILEBYTELIMIT; i++)
-                            {
-                                fileContentsdecrypt[i] = fileContents[i];
-                            }
+                            metaData = false;
                             byte[] reply = { 1 };
+                            senderSocket.Send(reply);
+                            sendFileSendingNotification(EventArgs.Empty);
+                        }
+                        else
+                        {
+                            byte[] reply = { 0 };
                             senderSocket.Send(reply);
                             sendFileSendingNotification(EventArgs.Empty);
                         }
                     }
                 }
+                else if (NumberOfBytes >= FILEBYTELIMIT && !metaData)
+                {
+                    lock (lockBinaryWriter)
+                    {
+                        BinaryWriter Writer;
+                        bool fileExist = false;
+                        DateTime currentFile = new DateTime();
+                        try
+                        {
+                            String[] fileNames = Directory.GetFiles(folderName);
+                            foreach (String file in fileNames)
+                            {
+                                String refiningFile = folderName + "\\" + receivingFileName;
+                                if (refiningFile.Equals(file))
+                                {
+                                    fileExist = true;
+                                    currentFile = File.GetLastWriteTime(folderName + "\\" + file);
+                                }
+                            }
+                            if (!fileExist)
+                            {
+                                Writer = new BinaryWriter(File.OpenWrite(folderName + "\\" + receivingFileName));
+                                Writer.Write(fileContents);
+                                Writer.Flush();
+                                Writer.Close();
+                                Writer.Dispose();
+                                receivingFileName = "";
+                                metaData = true;
+                            }
+                            else if ((metaDate > currentFile))
+                            {
+                                Writer = new BinaryWriter(File.OpenWrite(folderName + "\\" + receivingFileName));
+                                Writer.Write(fileContents);
+                                Writer.Flush();
+                                Writer.Close();
+                                Writer.Dispose();
+                                receivingFileName = "";
+                                metaData = true;
+                            }
+                        }
+                        catch
+                        {
+                            String[] tempList = Directory.GetFiles(folderName);
+                            receivingFileName = "corruptedDownload.txt";
+                            int counter = 1;
+                            foreach (String x in tempList)
+                            {
+                                if (x.Contains(receivingFileName))
+                                {
+                                    receivingFileName = "corruptedDownload(" + counter + ").txt";
+                                }
+
+                            }
+                            Writer = new BinaryWriter(File.OpenWrite(folderName + "\\" + receivingFileName));
+                        }
+                        byte[] fileContentsdecrypt = new byte[FILEBYTELIMIT];
+                        for (int i = 0; i < FILEBYTELIMIT; i++)
+                        {
+                            fileContentsdecrypt[i] = fileContents[i];
+                        }
+                        byte[] reply = { 1 };
+                        senderSocket.Send(reply);
+                        sendFileSendingNotification(EventArgs.Empty);
+                    }
+                }
+
 
             }
             catch (Exception ex)

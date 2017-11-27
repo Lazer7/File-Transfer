@@ -19,7 +19,13 @@ namespace NetWorkTesting
         private static bool threadRunning;
         static void Main(string[] args)
         {
-
+            String endCode = "";
+            for (int i = 0; i < 200; i++)
+            {
+                endCode += i;
+            }
+            byte[] haltMessage = Encoding.ASCII.GetBytes(endCode);
+            Console.WriteLine(haltMessage.Length);
             //String fileDirectory = "C:\\Users\\Jimmy\\Desktop\\Client1\\ahri.jpg";
             //byte[] fileContents = File.ReadAllBytes(fileDirectory);
             //    for (int i = 0; i < fileContents.Length; i++) {

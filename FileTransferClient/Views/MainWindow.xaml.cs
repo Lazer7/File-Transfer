@@ -121,13 +121,11 @@ namespace FileTransferClient
                         peerConnection.sendingfile = true;
                         //End the sync folder refresh thread
                         getNames = false;
-                        foreach (string ipAddress in connectedIPAddress)
-                        {
-                            currentSocket = ipAddress;
                             //peerConnection.ConnectToPeer(ipAddress);
                             ////////////////////////Start if Single Peer Transfer/////////////////////////////////////////////////////
                             reply = true;
                             peerConnection.SendSubdirectories(subdirectories);
+                            MessageBox.Show("Sent these things");
                             while (reply) ;
                             MessageBox.Show("SubDirectories sent");
                             for (int i = 0; i < fileList.Count; i++)
@@ -154,14 +152,18 @@ namespace FileTransferClient
                                     continue;
                                 }
                             }
-                            //////////////////////////////////End Single Peer Connection///////////////////////////////////
-                        }
+                        //////////////////////////////////End Single Peer Connection///////////////////////////////////
+                        peerConnection.SendResumeMessage();
                         currentSocket = null;
                         peerConnection.sendingfile = false;
                         //Remove event of receving file Responses
                         peerConnection.FileSendingNotification -= fileReply;
                         //Restart sync folder refresh directory
                         GetFileNames();
+                        this.Dispatcher.InvokeAsync(() =>
+                        {
+                            StatusLabel.Content = "Standby";
+                        });
                     }
                     Thread.Sleep(5000);
                 }
