@@ -155,6 +155,7 @@ namespace FileTransferClient
                             }
                         //////////////////////////////////End Single Peer Connection///////////////////////////////////
                         peerConnection.SendResumeMessage();
+
                         currentSocket = null;
                         peerConnection.sendingfile = false;
                         peerConnection.startSync = true;
@@ -294,8 +295,23 @@ namespace FileTransferClient
 
             return internalsubdirectory;
         }
+        private void updateConnections()
+        {
+            new Thread(() =>
+            {
+                while (true)
+                {
+                    if (peerConnection.currentSocket != null && !connectedIPAddress.Contains(peerConnection.currentSocket))
+                    {
+                        connectedIPAddress.Add(peerConnection.currentSocket);
+                    }
+                }
+            }).Start();
+        }
+
+
         ///////////////////////// EVENT FUNCTIONS//////////////////////////////////////
-        private void EventReached(object sender, EventArgs e)
+            private void EventReached(object sender, EventArgs e)
         {
             this.Dispatcher.Invoke(() =>
             {

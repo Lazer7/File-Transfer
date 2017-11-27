@@ -242,9 +242,9 @@ namespace FileTransferClient.Models
                     receivingSubdirectories = true;
                     metaData = true;
                     sendFileSendingNotification(EventArgs.Empty);
-                    return;
                 }
-                if (sendingfile)
+                if (startSync) { Debug.Assert(false,"Ignore the following"); }
+                else if (sendingfile)
                 {
                     sendFileSendingNotification(EventArgs.Empty);
                     if (fileContents[0] == 1) { GoodReceive = true; }
