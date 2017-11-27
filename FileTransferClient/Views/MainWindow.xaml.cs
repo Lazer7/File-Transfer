@@ -103,7 +103,6 @@ namespace FileTransferClient
             GetFileNames();
         }
 
-
         private void SendFile()
         {
             new Thread(() =>
@@ -112,6 +111,10 @@ namespace FileTransferClient
                 {
                     if (peerConnection.startSync && isConnected)
                     {
+                        this.Dispatcher.InvokeAsync(() =>
+                        {
+                            StatusLabel.Content = "Syncing";
+                        });
                         //this event allows the program to continue to send data after receiving a message that the other client has recieved the previous data
                         peerConnection.FileSendingNotification += fileReply;
                         peerConnection.sendingfile = true;
@@ -139,6 +142,7 @@ namespace FileTransferClient
                                     i--;
                                     continue;
                                 }
+                                MessageBox.Show("Meta File Sent");
                                 reply = true;
                                 peerConnection.SendFile(fileList[i]);
                                 //Wait for Reply from other client
@@ -149,6 +153,7 @@ namespace FileTransferClient
                                     i--;
                                     continue;
                                 }
+                                MessageBox.Show("File Sent");
                             }
                             //////////////////////////////////End Single Peer Connection///////////////////////////////////
                         }
@@ -158,8 +163,12 @@ namespace FileTransferClient
                         peerConnection.FileSendingNotification -= fileReply;
                         //Restart sync folder refresh directory
                         GetFileNames();
+                        this.Dispatcher.InvokeAsync(() =>
+                        {
+                            StatusLabel.Content = "Standby";
+                        });
                     }
-                    Thread.Sleep(5000);
+                    Thread.Sleep(10000);
                 }
             }).Start();
         }
