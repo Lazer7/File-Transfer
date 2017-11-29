@@ -30,6 +30,7 @@ namespace FileTransferClient.Models
         private Socket senderSocket;
         private static System.Object lockBinaryWriter = new System.Object();
         private static System.Object lockMetaData = new System.Object();
+        public bool isConnected { get; set; }
         public bool sendingfile { get; set; }
         public string currentSocket { get; set; }
         private bool receivingSubdirectories;
@@ -50,16 +51,19 @@ namespace FileTransferClient.Models
         {
             try
             {
-                SocketPermission permission = new SocketPermission(NetworkAccess.Connect, TransportType.Tcp, "", SocketPermission.AllPorts);
-                permission.Demand();
-                string hostName = Dns.GetHostName();
-                IPAddress[] hostAddress = Dns.GetHostAddresses(hostName);
-                endpoint = new IPEndPoint(hostAddress[1], PORT);
-                Listener = new Socket(hostAddress[1].AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                Listener.Bind(endpoint);
-                Listener.Listen(10);
-                AsyncCallback callBack = new AsyncCallback(CallBack);
-                Listener.BeginAccept(callBack, Listener);
+                if (Listener == null)
+                {
+                    SocketPermission permission = new SocketPermission(NetworkAccess.Connect, TransportType.Tcp, "", SocketPermission.AllPorts);
+                    permission.Demand();
+                    string hostName = Dns.GetHostName();
+                    IPAddress[] hostAddress = Dns.GetHostAddresses(hostName);
+                    endpoint = new IPEndPoint(hostAddress[1], PORT);
+                    Listener = new Socket(hostAddress[1].AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                    Listener.Bind(endpoint);
+                    Listener.Listen(10);
+                    AsyncCallback callBack = new AsyncCallback(CallBack);
+                    Listener.BeginAccept(callBack, Listener);
+                }
             }
             catch (Exception ex)
             {
@@ -77,6 +81,7 @@ namespace FileTransferClient.Models
                 IPEndPoint ipEndpoint = new IPEndPoint(ipAddress, PORT);
                 senderSocket = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                 senderSocket.Connect(ipEndpoint);
+                isConnected = true;
             }
             catch (Exception ex) { return ex.ToString(); }
             return "Success";
@@ -226,6 +231,12 @@ namespace FileTransferClient.Models
                 int NumberOfBytes = fileContents.Length;
                 startSync = false;
                 byte[] resumeSync = new byte[490];
+                byte[] checkGoodAddress = new byte[4];
+                for (int i = 0; i < 4; i++)
+                {
+                    checkGoodAddress[i] = fileContents[i];
+                }
+                IPAddress isGoodAddress = new IPAddress(checkGoodAddress);
                 for (int i = 0; i < 490; i++)
                 {
                     resumeSync[i] = fileContents[i];
@@ -243,13 +254,17 @@ namespace FileTransferClient.Models
                     metaData = true;
                     sendFileSendingNotification(EventArgs.Empty);
                 }
-                if (startSync) { Debug.Assert(false,"Ignore the following"); }
+                if (startSync) { Debug.Assert(false, "Ignore the following"); }
                 else if (sendingfile)
                 {
                     sendFileSendingNotification(EventArgs.Empty);
                     if (fileContents[0] == 1) { GoodReceive = true; }
                     else { GoodReceive = false; }
                     sendingfile = false;
+                }
+                else if (isGoodAddress.ToString().Equals("0.0.0.0"))
+                {
+                    Debug.Assert(false, "Do not parse yet");
                 }
                 else if (NumberOfBytes >= FILEBYTELIMIT && receivingSubdirectories)
                 {
@@ -418,11 +433,12 @@ namespace FileTransferClient.Models
 
                             }
                             Writer = new BinaryWriter(File.OpenWrite(folderName + "\\" + receivingFileName));
-                        }
-                        byte[] fileContentsdecrypt = new byte[FILEBYTELIMIT];
-                        for (int i = 0; i < FILEBYTELIMIT; i++)
-                        {
-                            fileContentsdecrypt[i] = fileContents[i];
+                            Writer.Write(fileContents);
+                            Writer.Flush();
+                            Writer.Close();
+                            Writer.Dispose();
+                            receivingFileName = "";
+                            metaData = true;
                         }
                         byte[] reply = { 1 };
                         senderSocket.Send(reply);
@@ -434,6 +450,12 @@ namespace FileTransferClient.Models
             }
             catch (Exception ex)
             {
+                if (!sendingfile) {
+                    sendFileSendingNotification(EventArgs.Empty);
+                    byte[] reply = { 0 };
+                    senderSocket.Send(reply);
+                    sendFileSendingNotification(EventArgs.Empty);
+                }
                 Debug.Assert(false, ex.Message);
             }
 

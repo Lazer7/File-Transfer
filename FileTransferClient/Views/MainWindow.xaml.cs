@@ -20,10 +20,11 @@ namespace FileTransferClient
         //Contains list of all files in the specified directory
         List<String> fileList;
         List<String> subdirectories;
-        //(geply) check if file was sent correctly
+        //(reply) check if file was sent correctly
         //(getNames) halts the refresh of the directory get list of files  
-        string currentSocket;
         bool reply,getNames,isConnected;
+        //The current Socket the client is connected to
+        string currentSocket;
         ////////////////////Window Form Functions ////////////////
         public MainWindow()
         {
@@ -42,15 +43,21 @@ namespace FileTransferClient
             this.Closed += CloseActiveThreads;
 
         }
+        /// <summary>
+        /// The function to connect to a computer once the
+        /// Connect button has been pressed
+        /// </summary>
         private void Connect_Click(object sender, RoutedEventArgs e)
         {
             String ipAddress = AvailableIPAddressListBox.SelectedItem.ToString();
-            //Creates a socket for the selected ip 
+            //Adds the address name to the list of connected devices
             connectedIPAddress.Add(ipAddress);
+            //Update the list onto the view
             ConnectedIPAddressListBox.ItemsSource = connectedIPAddress;
+            //Connect to the IPAddress
             peerConnection.ConnectToPeer(ipAddress);
-            isConnected = true;
         }
+
         private void SendButton_Click(object sender, RoutedEventArgs e)
         {
             //this event allows the program to continue to send data after receiving a message that the other client has recieved the previous data
@@ -104,31 +111,39 @@ namespace FileTransferClient
         }
 
 
+        /// <summary>
+        /// Thread to automatically send files to the peer client
+        /// </summary>
         private void SendFile()
         {
+            //Create a Thread to run the syncing of folders every 10-15 seconds
             new Thread(() =>
             {
                 while (true)
                 {
-                    if (peerConnection.startSync && isConnected)
+                    if (peerConnection.startSync && peerConnection.isConnected)
                     {
+                        //Updates UI components to notify the current client is starting to sync
                         this.Dispatcher.InvokeAsync(() =>
                         {
-                            StatusLabel.Content = "Syncing";
+                            StatusLabel.Content = "Sending";
+                            SendButton.IsEnabled = false;
                         });
                         //this event allows the program to continue to send data after receiving a message that the other client has recieved the previous data
                         peerConnection.FileSendingNotification += fileReply;
+                        //Notify the sockets that the receving information is about good or bad receives
                         peerConnection.sendingfile = true;
                         //End the sync folder refresh thread
                         getNames = false;
+                        //Gets the current address to send to
                         currentSocket = connectedIPAddress[0];
                             //peerConnection.ConnectToPeer(ipAddress);
                             ////////////////////////Start if Single Peer Transfer/////////////////////////////////////////////////////
                             reply = true;
+                            //Begin the sending of directories
                             peerConnection.SendSubdirectories(subdirectories);
-                            MessageBox.Show("Sent these things");
                             while (reply) ;
-                            MessageBox.Show("SubDirectories sent");
+                            //Loop through all the files in the directory
                             for (int i = 0; i < fileList.Count; i++)
                             {
                                 reply = true;
@@ -166,6 +181,7 @@ namespace FileTransferClient
                         this.Dispatcher.InvokeAsync(() =>
                         {
                             StatusLabel.Content = "Standby";
+                            SendButton.IsEnabled = true;
                         });
                         Thread.Sleep(10000);
                     }
@@ -173,26 +189,18 @@ namespace FileTransferClient
                 }
             }).Start();
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        /// <summary>
+        /// The function to refresh the arp table and checking any new 
+        /// devices or remove any devices that disconnected
+        /// </summary>
         private void Refresh_Click(object sender, RoutedEventArgs e)
         {
             peerConnection.PingAddress();
             peerConnection.FileSendingNotification += EventReached;
         }
+        /// <summary>
+        /// Disconnect the connected ip address that was selected from the listbox
+        /// </summary>
         private void DisconnectButton_Click(object sender, RoutedEventArgs e)
         {
             peerConnection.Disconnect();
@@ -200,6 +208,9 @@ namespace FileTransferClient
             connectedIPAddress.Remove(ipAddress);
             ConnectedIPAddressListBox.ItemsSource = connectedIPAddress;
         }
+        /// <summary>
+        /// This is the button that selects the folder to sync between the clients
+        /// </summary>
         private void Folder_Click(object sender, RoutedEventArgs e)
         {
             ///////////////////////GET FOLDER FOR SYNCING//////////////////
@@ -210,7 +221,8 @@ namespace FileTransferClient
                 peerConnection = new Connection(open.SelectedPath);
                 open.Dispose();
             }
-            ///////////////////////////////////////////////////////////////
+            ////////////////////END GETTING FOLDER FOR SYNCING/////////////
+            //Add the reconnect event handler to reconnect to the socket after receiving a message
             peerConnection.FileSendingNotification += Reconnect;
             //Ping all ip addressses on the network
             peerConnection.PingAddress();
@@ -222,8 +234,13 @@ namespace FileTransferClient
             LabelChecking.Content = "Your IP Address is" + iPAddress[1].ToString();
             //////////////////////////////////////////////////////////////
             AvailableIPAddressListBox.ItemsSource = peerConnection.GetIpAddress();
+            //Start Thread to refresh any new files that has been inputted into the sync folder
             GetFileNames();
+            //Start the Thread to sync the folder to the other client
             SendFile();
+            //This updates the receiving ip address
+            updateConnections();
+            //Enabling client functionalities
             DisconnectButton.IsEnabled = true;
             ConnectingB.IsEnabled = true;
             RefreshButton.IsEnabled = true;
@@ -233,6 +250,9 @@ namespace FileTransferClient
             isConnected = false;
         }
         ////////////////////Data Retrieval Functions//////////////////////////////////////
+        /// <summary>
+        /// This gets all the file names in the sync folder and displays them in the listbox
+        /// </summary>
         private void GetFileNames()
         {
             getNames = true;
@@ -267,6 +287,12 @@ namespace FileTransferClient
                 }
             }).Start();
         }
+        /// <summary>
+        /// This gets the sub directories in the sync folder recursively
+        /// </summary>
+        /// <param name="homeDirectory"></param> The primary home directory of the sync folder
+        /// <param name="previousDirectory"></param> The previous directory in the sync folder 
+        /// <returns>List of </returns>
         List<String> subdirectoryEntries(string homeDirectory, string previousDirectory = "")
         {
             string[] subdirectory = Directory.GetDirectories(homeDirectory);
@@ -304,6 +330,11 @@ namespace FileTransferClient
                     if (peerConnection.currentSocket != null && !connectedIPAddress.Contains(peerConnection.currentSocket))
                     {
                         connectedIPAddress.Add(peerConnection.currentSocket);
+                        this.Dispatcher.InvokeAsync(() =>
+                        {
+                            ConnectedIPAddressListBox.ItemsSource = connectedIPAddress;
+                        });
+                        isConnected = true;
                     }
                 }
             }).Start();
@@ -311,7 +342,10 @@ namespace FileTransferClient
 
 
         ///////////////////////// EVENT FUNCTIONS//////////////////////////////////////
-            private void EventReached(object sender, EventArgs e)
+        /// <summary>
+        /// 
+        /// </summary>
+        private void EventReached(object sender, EventArgs e)
         {
             this.Dispatcher.Invoke(() =>
             {
