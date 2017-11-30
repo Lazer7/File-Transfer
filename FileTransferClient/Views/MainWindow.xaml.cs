@@ -5,7 +5,12 @@ using System.IO;
 using System.Net;
 using System.Threading;
 using System.Windows;
-
+/// <summary>
+/// Jimmy Chao
+/// Lazer Incorporate
+/// 012677182
+/// CECS 327
+/// </summary>
 namespace FileTransferClient
 {
     /// <summary>
@@ -22,7 +27,7 @@ namespace FileTransferClient
         List<String> subdirectories;
         //(reply) check if file was sent correctly
         //(getNames) halts the refresh of the directory get list of files  
-        bool reply,getNames,isConnected;
+        bool reply, getNames, isConnected;
         //The current Socket the client is connected to
         string currentSocket;
         ////////////////////Window Form Functions ////////////////
@@ -74,7 +79,6 @@ namespace FileTransferClient
                 reply = true;
                 peerConnection.SendSubdirectories(subdirectories);
                 while (reply) ;
-                MessageBox.Show("SubDirectories sent");
                 for (int i = 0; i < fileList.Count; i++)
                 {
                     reply = true;
@@ -109,8 +113,6 @@ namespace FileTransferClient
             //Restart sync folder refresh directory
             GetFileNames();
         }
-
-
         /// <summary>
         /// Thread to automatically send files to the peer client
         /// </summary>
@@ -137,40 +139,40 @@ namespace FileTransferClient
                         getNames = false;
                         //Gets the current address to send to
                         currentSocket = connectedIPAddress[0];
-                            //peerConnection.ConnectToPeer(ipAddress);
-                            ////////////////////////Start if Single Peer Transfer/////////////////////////////////////////////////////
+                        ////////////////////////Start if Single Peer Transfer/////////////////////////////////////////////////////
+                        reply = true;
+                        //Begin the sending of directories
+                        peerConnection.SendSubdirectories(subdirectories);
+                        //Wait for a reply back from the receiving client to see if they got the subdirectories
+                        while (reply) ;
+                        //Loop through all the files in the directory
+                        for (int i = 0; i < fileList.Count; i++)
+                        {
                             reply = true;
-                            //Begin the sending of directories
-                            peerConnection.SendSubdirectories(subdirectories);
+                            peerConnection.SendFileMetaData(fileList[i]);
+                            //Wait for Reply from other client
                             while (reply) ;
-                            //Loop through all the files in the directory
-                            for (int i = 0; i < fileList.Count; i++)
+                            //Check if the data sent was received correctly
+                            if (!peerConnection.GoodReceive)
                             {
-                                reply = true;
-                                peerConnection.SendFileMetaData(fileList[i]);
-                                //Wait for Reply from other client
-                                while (reply) ;
-                                //Check if the data sent was received correctly
-                                if (!peerConnection.GoodReceive)
-                                {
-                                    //roll back and resend the file again
-                                    i--;
-                                    continue;
-                                }
-                                reply = true;
-                                peerConnection.SendFile(fileList[i]);
-                                //Wait for Reply from other client
-                                while (reply) ;
-                                if (!peerConnection.GoodReceive)
-                                {
-                                    //roll back and resend the file again
-                                    i--;
-                                    continue;
-                                }
+                                //roll back and resend the file again
+                                i--;
+                                continue;
                             }
+                            reply = true;
+                            peerConnection.SendFile(fileList[i]);
+                            //Wait for Reply from other client
+                            while (reply) ;
+                            if (!peerConnection.GoodReceive)
+                            {
+                                //roll back and resend the file again
+                                i--;
+                                continue;
+                            }
+                        }
                         //////////////////////////////////End Single Peer Connection///////////////////////////////////
                         peerConnection.SendResumeMessage();
-
+                        //Clear sending node after sync is complete
                         currentSocket = null;
                         peerConnection.sendingfile = false;
                         peerConnection.startSync = true;
@@ -178,11 +180,13 @@ namespace FileTransferClient
                         peerConnection.FileSendingNotification -= fileReply;
                         //Restart sync folder refresh directory
                         GetFileNames();
+                        //Update UI components
                         this.Dispatcher.InvokeAsync(() =>
                         {
                             StatusLabel.Content = "Standby";
                             SendButton.IsEnabled = true;
                         });
+                        //Wait 10 seconds to check for syncing again
                         Thread.Sleep(10000);
                     }
                     Thread.Sleep(5000);
@@ -231,7 +235,7 @@ namespace FileTransferClient
             ///////Gets and display the host computer's ip address////////
             string hostName = Dns.GetHostName();
             IPAddress[] iPAddress = Dns.GetHostAddresses(hostName);
-            LabelChecking.Content = "Your IP Address is" + iPAddress[1].ToString();
+            LabelChecking.Content = "Your IP Address is " + iPAddress[1].ToString();
             //////////////////////////////////////////////////////////////
             AvailableIPAddressListBox.ItemsSource = peerConnection.GetIpAddress();
             //Start Thread to refresh any new files that has been inputted into the sync folder
@@ -258,7 +262,7 @@ namespace FileTransferClient
             getNames = true;
             new Thread(() =>
             {
-                
+
                 while (getNames)
                 {
                     subdirectories = subdirectoryEntries(peerConnection.GetSyncFolderName());
@@ -271,10 +275,10 @@ namespace FileTransferClient
                     }
                     foreach (string directory in subdirectories)
                     {
-                        tempList = Directory.GetFiles(peerConnection.GetSyncFolderName()+directory);
+                        tempList = Directory.GetFiles(peerConnection.GetSyncFolderName() + directory);
                         foreach (String file in tempList)
                         {
-                            String fileName = directory+"\\"+ file.Substring(file.LastIndexOf('\\') + 1);
+                            String fileName = directory + "\\" + file.Substring(file.LastIndexOf('\\') + 1);
                             fileList.Add(fileName);
                         }
                     }
@@ -321,12 +325,18 @@ namespace FileTransferClient
 
             return internalsubdirectory;
         }
+        /// <summary>
+        /// Updates the end client peer's connection
+        /// Once it receives a message from a sending client and connect to it
+        /// </summary>
         private void updateConnections()
         {
             new Thread(() =>
             {
                 while (true)
                 {
+                    //Check if the receiving client is not connected to anything and if the current client does not have that 
+                    //client on their connected list
                     if (peerConnection.currentSocket != null && !connectedIPAddress.Contains(peerConnection.currentSocket))
                     {
                         connectedIPAddress.Add(peerConnection.currentSocket);
@@ -339,8 +349,6 @@ namespace FileTransferClient
                 }
             }).Start();
         }
-
-
         ///////////////////////// EVENT FUNCTIONS//////////////////////////////////////
         /// <summary>
         /// 

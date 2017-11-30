@@ -5,22 +5,31 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FileTransferClient"
         mc:Ignorable="d"
-        Title="MainWindow" Height="384.2" Width="780.2">
+        Title="Lazer's Peer to Peer Transfer File" Height="400" Width="800">
     <Grid>
-        <Button Name="ConnectingB" Content="Connect" Click="Connect_Click" HorizontalAlignment="Left" Margin="71,293,0,0" VerticalAlignment="Top" Width="75"/>
-        <Label Name="LabelChecking" Content="Checking" HorizontalAlignment="Left" Margin="114,57,0,0" VerticalAlignment="Top"/>
-        <Button Name="SendButton" Content="Send" Click="SendButton_Click" HorizontalAlignment="Left" Margin="217,325,0,0" VerticalAlignment="Top" Width="75"/>
+        <Grid.Background>
+            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                <GradientStop Color="Black" Offset="0"/>
+                <GradientStop Color="#FFEB1C1C" Offset="1"/>
+            </LinearGradientBrush>
+        </Grid.Background>
+        <Button Name="ConnectingB" Content="Connect" Click="Connect_Click" HorizontalAlignment="Left" Margin="71,293,0,0" VerticalAlignment="Top" Width="75" Background="Black" BorderBrush="White" Foreground="White"/>
+        <Button Name="SendButton" Content="Send" Click="SendButton_Click" HorizontalAlignment="Left" Margin="217,325,0,0" VerticalAlignment="Top" Width="75" Background="Black" BorderBrush="White" Foreground="White"/>
+        <Button Name="DisconnectButton" Content="Disconnect" Click="DisconnectButton_Click" HorizontalAlignment="Left" Margin="323,293,0,0" VerticalAlignment="Top" Width="75" Background="Black" BorderBrush="#FFD7D7D7" Foreground="White"/>
+        <Button Name="RefreshButton" Content="Refresh" Click="Refresh_Click" HorizontalAlignment="Left" Margin="25,63,0,0" VerticalAlignment="Top" Width="51" Background="Black" BorderBrush="White" Foreground="White"/>
+        <Button Content="Search for Folder" Click="Folder_Click" HorizontalAlignment="Left" Margin="25,26,0,0" VerticalAlignment="Top" Width="105" Background="Black" BorderBrush="White" Foreground="White"/>
+        <ListBox Name="FileListBox" HorizontalAlignment="Left" Height="162" Margin="504,113,0,0" VerticalAlignment="Top" Width="232"/>
+        <Label Name="LabelChecking" Content="Checking" HorizontalAlignment="Left" Margin="114,57,0,0" VerticalAlignment="Top" Background="Transparent" Foreground="White"/>
+        <Label Content="Available IP Addresses" HorizontalAlignment="Left" Margin="71,87,0,0" VerticalAlignment="Top" Foreground="White"/>
+        <Label Content="Connected Devices" HorizontalAlignment="Left" Margin="288,87,0,0" VerticalAlignment="Top" Foreground="White"/>
+        <Label Content="Files" HorizontalAlignment="Left" Margin="504,87,0,0" VerticalAlignment="Top" Foreground="White"/>
+        <Label Name="StatusLabel" HorizontalAlignment="Left" Margin="336,325,0,0" VerticalAlignment="Top" Foreground="White"/>
         <ListBox Name="AvailableIPAddressListBox" HorizontalAlignment="Left" Height="162" Margin="71,113,0,0" VerticalAlignment="Top" Width="154"/>
         <ListBox Name="ConnectedIPAddressListBox" HorizontalAlignment="Left" Height="162" Margin="288,113,0,0" VerticalAlignment="Top" Width="157"/>
-        <Label Content="Available IP Addresses" HorizontalAlignment="Left" Margin="71,87,0,0" VerticalAlignment="Top"/>
-        <Label Content="Connected Devices" HorizontalAlignment="Left" Margin="288,87,0,0" VerticalAlignment="Top"/>
-        <Button Name="DisconnectButton" Content="Disconnect" Click="DisconnectButton_Click" HorizontalAlignment="Left" Margin="323,293,0,0" VerticalAlignment="Top" Width="75"/>
-        <Button Name="RefreshButton" Content="Refresh" Click="Refresh_Click" HorizontalAlignment="Left" Margin="25,63,0,0" VerticalAlignment="Top" Width="51"/>
-        <Button Content="Search for Folder" Click="Folder_Click" HorizontalAlignment="Left" Margin="25,26,0,0" VerticalAlignment="Top" Width="105"/>
-        <ListBox Name="FileListBox" HorizontalAlignment="Left" Height="162" Margin="504,113,0,0" VerticalAlignment="Top" Width="232"/>
-        <Label Content="Files" HorizontalAlignment="Left" Margin="504,87,0,0" VerticalAlignment="Top"/>
-        <Viewbox HorizontalAlignment="Left" Height="100" Margin="586,311,0,-56.6" VerticalAlignment="Top" Width="100"/>
-        <Label Name="StatusLabel" HorizontalAlignment="Left" Margin="336,325,0,0" VerticalAlignment="Top"/>
+        <Image HorizontalAlignment="Left" Height="82" Margin="700,10,0,0" VerticalAlignment="Top" Width="84" Source="../mascot.png"/>
+
+
+
 
     </Grid>
 </Window>
