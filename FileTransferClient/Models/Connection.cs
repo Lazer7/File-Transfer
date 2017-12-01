@@ -56,7 +56,6 @@ namespace FileTransferClient.Models
         {
             //set the folder name into this class instance
             this.folderName = folderName;
-            currentSocket = null;
             sendingfile = false;
             metaData = true;
             receivingSubdirectories = true;
